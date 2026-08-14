@@ -1,0 +1,25 @@
+Luiz Henrique 
+
+  5. Escopo
+Funcionalidades incluídas na primeira versão
+• Cadastro de clientes.
+• Cadastro de profissionais.
+• Cadastro de serviços.
+• Cadastro de horários disponíveis.
+• Agendamento de serviços.
+• Alteração e cancelamento de agendamentos.
+• Consulta do histórico de atendimentos.
+• Controle da situação dos atendimentos.
+• Envio de confirmações e lembretes.
+• Emissão de relatórios básicos.
+Itens que não farão parte do projeto neste momento
+• Pagamentos online.
+• Integração com sistemas bancários.
+• Integração com redes sociais.
+   Aplicativo para dispositivos móveis.
+• Integração com sistemas de emissão de nota fiscal.
+Restrições
+• O projeto será desenvolvido dentro do prazo estabelecido pela disciplina.
+• Será utilizado um banco de dados relacional.
+• O sistema funcionará inicialmente como aplicação web.
+• As integrações externas serão consideradas apenas em versões futuras do sistema.
