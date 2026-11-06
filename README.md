@@ -57,10 +57,9 @@ Um sistema web que centraliza clientes, profissionais, serviços, horários e hi
 | Integrante | Frente de trabalho |
 | --- | --- |
 | João Guilherme de Mello Rodrigues | Regras do agendamento: disponibilidade, conflito, remarcação e cancelamento |
-| Gabriel Victor Pais Hartmann | Banco de dados, configuração do projeto, repositório e documentação |
+| Gabriel Victor Pais Hartmann | Banco de dados, configuração do projeto, repositório, documentação, horários e bloqueios, acesso e relatórios |
 | Luiz Henrique de Morais Franco | Interface, agenda do dia e situação do atendimento |
 | Thiago Gomes Oliveira | Cadastros de clientes, profissionais, serviços e histórico do cliente |
-| Carlos Alexandre Ogrysko | Horários e bloqueios, bloqueio por faltas, acesso e relatórios |
 
 ---
 
