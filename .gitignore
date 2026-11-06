@@ -1,0 +1,31 @@
+# build Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+build/
+*.class
+*.jar
+*.war
+
+# logs e arquivos temporarios
+*.log
+logs/
+*.tmp
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.settings/
+.project
+.classpath
+
+# configuracoes locais e credenciais
+src/main/resources/application-local.properties
+application-local.properties
+.env
+
+# sistema operacional
+.DS_Store
+Thumbs.db

@@ -1,0 +1,16 @@
+AgendaPro - execucao dos testes de regra de negocio
+Data da execucao: 2026-10-20T16:11:49
+------------------------------------------------------------
+CT01   RF01         Cadastrar cliente com dados validos                APROVADO
+CT02   RF01 / RNF05 Recusar nome e telefone vazios                     APROVADO
+CT03   RN07         Recusar e-mail repetido de cliente ativo           APROVADO
+CT04   RN07         Permitir telefone de cliente inativo               APROVADO
+CT05   RN07         Editar o proprio cadastro sem acusar duplicidade   APROVADO
+CT06   RNF05        Recusar e-mail em formato invalido                 APROVADO
+CT07   RF04         Cadastrar servico com dados validos                APROVADO
+CT08   RN03         Recusar servico sem duracao valida                 APROVADO
+CT09   RN14         Recusar nome de servico repetido                   APROVADO
+CT10   RN03         Calcular o horario final pela duracao              APROVADO
+CT11   RNF05        Recusar preco negativo                             APROVADO
+------------------------------------------------------------
+Total: 11 caso(s) | Aprovados: 11 | Reprovados: 0

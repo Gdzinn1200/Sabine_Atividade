@@ -1,0 +1,54 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam activity {
+  BackgroundColor #D9E2F3
+  BorderColor #1F3864
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #1F3864
+}
+skinparam swimlane {
+  BorderColor #1F3864
+  TitleFontColor #1F3864
+}
+title Processo 2 - Cancelar agendamento
+
+|Usuário|
+start
+:Localiza o agendamento na agenda
+ou no histórico e abre o detalhe;
+:Seleciona a opção "Cancelar agendamento";
+|Sistema|
+if (A situação atual permite
+o cancelamento? (RN09)) then (não)
+  |Usuário|
+  :Visualiza o aviso de que a
+  situação atual é final;
+  stop
+else (sim)
+endif
+|Sistema|
+if (Cancelamento solicitado pelo cliente
+com menos de 4 horas? (RN05)) then (sim)
+  |Usuário|
+  :Visualiza a orientação para contatar
+  o estabelecimento;
+  stop
+else (não)
+endif
+|Usuário|
+:Informa o motivo e confirma
+o cancelamento;
+|Sistema|
+:Altera a situação para "Cancelado"
+e libera o horário na agenda;
+:Registra o histórico da mudança
+de situação (RNF10);
+:Envia o e-mail de aviso ao cliente (RF14);
+|Usuário|
+:Visualiza a mensagem de sucesso e a
+agenda atualizada;
+stop
+@enduml

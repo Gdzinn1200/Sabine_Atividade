@@ -1,0 +1,40 @@
+AgendaPro - execucao dos testes de regra de negocio
+Data da execucao: 2026-11-06T15:43:43
+-------------------------------------------------------------------------------
+Caso    Requisito / regra      Verificacao                                  Resultado
+-------------------------------------------------------------------------------
+CT01    RF01                   Cadastrar cliente com dados validos          APROVADO
+CT02    RF01 / RNF05           Recusar nome e telefone vazios               APROVADO
+CT03    RN07                   Recusar e-mail repetido de cliente ativo     APROVADO
+CT04    RN07                   Permitir telefone de cliente inativo         APROVADO
+CT05    RN07                   Editar o proprio cadastro sem acusar duplicidade APROVADO
+CT06    RNF05                  Recusar e-mail em formato invalido           APROVADO
+CT07    RF04                   Cadastrar servico com dados validos          APROVADO
+CT08    RN03                   Recusar servico sem duracao valida           APROVADO
+CT09    RN14                   Recusar nome de servico repetido             APROVADO
+CT10    RN03                   Calcular o horario final pela duracao        APROVADO
+CT11    RNF05                  Recusar preco negativo                       APROVADO
+CT12    RN01                   Detectar sobreposicao de horario do profissional APROVADO
+CT13    RN01                   Aceitar atendimentos encostados, sem sobreposicao APROVADO
+CT14    RN01                   Horario de atendimento cancelado volta a ficar livre APROVADO
+CT15    RN02                   Recusar horario fora da faixa de atendimento APROVADO
+CT16    RN02                   Detectar bloqueio de agenda no periodo       APROVADO
+CT17    RF07                   Grade marca ocupados, bloqueados e livres    APROVADO
+CT18    RN04                   Horarios ja passados nao sao oferecidos      APROVADO
+CT19    RN06                   Recusar profissional que nao executa o servico APROVADO
+CT20    RN08                   Recusar o quarto agendamento futuro do cliente APROVADO
+CT21    RN10                   Contar faltas na janela de 90 dias e bloquear o cliente APROVADO
+CT22    RN10                   Recusar agendamento de cliente bloqueado por faltas APROVADO
+CT23    RN04                   Recusar agendamento em data ja passada       APROVADO
+CT24    RN01                   Recusar agendamento sobreposto a outro atendimento APROVADO
+CT25    RF08                   Aceitar agendamento que atende a todas as regras APROVADO
+CT26    RF05 / RN02            Recusar faixa invertida e faixa sobreposta   APROVADO
+CT27    RN09                   Permitir a sequencia Agendado - Confirmado - Em atendimento - Concluido APROVADO
+CT28    RN09                   Recusar salto de Agendado direto para Concluido APROVADO
+CT29    RN09                   Recusar alteracao de atendimento em situacao final APROVADO
+CT30    RN05                   Recusar cancelamento do cliente com menos de 4 horas APROVADO
+CT31    RN05                   Permitir cancelamento do cliente com mais de 4 horas APROVADO
+CT32    RN05                   Permitir cancelamento pelo estabelecimento a qualquer momento APROVADO
+CT33    RF10 / RNF05           Exigir o motivo do cancelamento              APROVADO
+-------------------------------------------------------------------------------
+Total: 33 caso(s) | Aprovados: 33 | Reprovados: 0

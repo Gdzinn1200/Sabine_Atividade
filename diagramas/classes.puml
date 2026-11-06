@@ -1,0 +1,138 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F3864
+  HeaderBackgroundColor #D9E2F3
+  AttributeFontColor #1A1A1A
+}
+hide circle
+
+class Usuario {
+  - id : Long
+  - nome : String
+  - email : String
+  - senhaHash : String
+  - perfil : Perfil
+  - ativo : boolean
+  - dataCadastro : LocalDateTime
+  + autenticar(senha) : boolean
+  + alterarSenha(nova) : void
+}
+
+enum Perfil {
+  ADMINISTRADOR
+  PROFISSIONAL
+  CLIENTE
+}
+
+class Cliente {
+  - id : Long
+  - nome : String
+  - telefone : String
+  - email : String
+  - dataNascimento : LocalDate
+  - ativo : boolean
+  - bloqueado : boolean
+  + contarFaltas(periodo) : int
+  + possuiLimiteDisponivel() : boolean
+}
+
+class Profissional {
+  - id : Long
+  - nome : String
+  - telefone : String
+  - email : String
+  - ativo : boolean
+  + executaServico(servico) : boolean
+  + estaDisponivel(inicio, fim) : boolean
+}
+
+class Servico {
+  - id : Long
+  - nome : String
+  - descricao : String
+  - duracaoMinutos : int
+  - preco : BigDecimal
+  - ativo : boolean
+}
+
+class HorarioAtendimento {
+  - id : Long
+  - diaSemana : DayOfWeek
+  - horaInicio : LocalTime
+  - horaFim : LocalTime
+}
+
+class BloqueioAgenda {
+  - id : Long
+  - inicio : LocalDateTime
+  - fim : LocalDateTime
+  - motivo : String
+}
+
+class Agendamento {
+  - id : Long
+  - dataHoraInicio : LocalDateTime
+  - dataHoraFim : LocalDateTime
+  - situacao : SituacaoAgendamento
+  - valor : BigDecimal
+  - observacao : String
+  - criadoEm : LocalDateTime
+  + calcularTermino() : LocalDateTime
+  + possuiConflito(outro) : boolean
+  + alterarSituacao(nova, usuario) : void
+  + podeSerCancelado(perfil) : boolean
+}
+
+enum SituacaoAgendamento {
+  AGENDADO
+  CONFIRMADO
+  EM_ATENDIMENTO
+  CONCLUIDO
+  CANCELADO
+  NAO_COMPARECEU
+}
+
+class HistoricoSituacao {
+  - id : Long
+  - situacaoAnterior : SituacaoAgendamento
+  - situacaoNova : SituacaoAgendamento
+  - dataHora : LocalDateTime
+  - motivo : String
+}
+
+class Notificacao {
+  - id : Long
+  - tipo : TipoNotificacao
+  - destinatario : String
+  - dataHoraEnvio : LocalDateTime
+  - enviada : boolean
+  + enviar() : boolean
+}
+
+enum TipoNotificacao {
+  CONFIRMACAO
+  LEMBRETE
+  CANCELAMENTO
+}
+
+Usuario "1" -- "0..1" Cliente : acessa >
+Usuario "1" -- "0..1" Profissional : acessa >
+Usuario --> Perfil
+Profissional "1..*" -- "1..*" Servico : executa >
+Profissional "1" -- "1..*" HorarioAtendimento : possui >
+Profissional "1" -- "0..*" BloqueioAgenda : registra >
+Cliente "1" -- "0..*" Agendamento : solicita >
+Profissional "1" -- "0..*" Agendamento : atende >
+Servico "1" -- "0..*" Agendamento : refere-se a >
+Agendamento --> SituacaoAgendamento
+Agendamento "1" -- "0..*" HistoricoSituacao : registra >
+Agendamento "1" -- "0..*" Notificacao : gera >
+Notificacao --> TipoNotificacao
+HistoricoSituacao "0..*" -- "1" Usuario : realizada por >
+@enduml

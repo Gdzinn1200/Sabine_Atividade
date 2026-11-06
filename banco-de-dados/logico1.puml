@@ -1,0 +1,86 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F3864
+  HeaderBackgroundColor #D9E2F3
+}
+hide circle
+hide methods
+title Parte 1 - Cadastros
+
+entity "usuario" as usuario {
+  <b>id_usuario</b> : INT <<PK>>
+  --
+  * nome : VARCHAR(120)
+  * email : VARCHAR(120) <<UK>>
+  * senha_hash : VARCHAR(255)
+  * perfil : ENUM
+  * ativo : BOOLEAN
+  * data_cadastro : DATETIME
+}
+entity "cliente" as cliente {
+  <b>id_cliente</b> : INT <<PK>>
+  --
+  id_usuario : INT <<FK>>
+  * nome : VARCHAR(120)
+  * telefone : VARCHAR(20)
+  email : VARCHAR(120) <<UK>>
+  data_nascimento : DATE
+  * ativo : BOOLEAN
+  * bloqueado : BOOLEAN
+}
+entity "profissional" as profissional {
+  <b>id_profissional</b> : INT <<PK>>
+  --
+  id_usuario : INT <<FK>>
+  * nome : VARCHAR(120)
+  * telefone : VARCHAR(20)
+  email : VARCHAR(120)
+  * ativo : BOOLEAN
+}
+entity "servico" as servico {
+  <b>id_servico</b> : INT <<PK>>
+  --
+  * nome : VARCHAR(80)
+  descricao : VARCHAR(255)
+  * duracao_minutos : INT
+  * preco : DECIMAL(10,2)
+  * ativo : BOOLEAN
+}
+entity "profissional_servico" as ps {
+  <b>id_profissional</b> : INT <<PK>> <<FK>>
+  <b>id_servico</b> : INT <<PK>> <<FK>>
+}
+entity "horario_atendimento" as horario {
+  <b>id_horario</b> : INT <<PK>>
+  --
+  * id_profissional : INT <<FK>>
+  * dia_semana : TINYINT
+  * hora_inicio : TIME
+  * hora_fim : TIME
+}
+entity "bloqueio_agenda" as bloqueio {
+  <b>id_bloqueio</b> : INT <<PK>>
+  --
+  * id_profissional : INT <<FK>>
+  * data_hora_inicio : DATETIME
+  * data_hora_fim : DATETIME
+  motivo : VARCHAR(120)
+}
+
+usuario ||--o| cliente
+usuario ||--o| profissional
+profissional ||--{ ps
+servico ||--{ ps
+profissional ||--{ horario
+profissional ||--o{ bloqueio
+
+legend bottom
+  * campo obrigatório  |  PK chave primária  |  FK chave estrangeira  |  UK índice único
+endlegend
+@enduml

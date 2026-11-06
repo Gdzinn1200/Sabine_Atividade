@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inicio &middot; AgendaPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/agendapro.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-agendapro mb-4">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">Agenda<span>Pro</span></a>
+    <div class="navbar-nav flex-wrap">
+      <a class="nav-link active" th:href="@{/}">Inicio</a>
+      <a class="nav-link" th:href="@{/agenda}">Agenda</a>
+      <a class="nav-link" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+      <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+      <a class="nav-link" th:href="@{/profissionais}">Profissionais</a>
+      <a class="nav-link" th:href="@{/servicos}">Servicos</a>
+      <a class="nav-link" th:href="@{/horarios}">Horarios</a>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+  <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Atendimentos hoje</div>
+      <div class="display-6" th:text="${#lists.size(agendamentosHoje)}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Aguardando confirmacao</div>
+      <div class="display-6" th:text="${aguardando}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Clientes ativos</div>
+      <div class="display-6" th:text="${totalClientes}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Profissionais ativos</div>
+      <div class="display-6" th:text="${totalProfissionais}">0</div></div></div>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <div class="card-title">Atendimentos de hoje</div>
+    <div th:if="${#lists.isEmpty(agendamentosHoje)}" class="vazio">
+      <p>Nenhum atendimento marcado para hoje.</p>
+      <a class="btn btn-primary" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(agendamentosHoje)}">
+      <table class="table align-middle">
+        <thead><tr><th>Horario</th><th>Cliente</th><th>Servico</th><th>Profissional</th>
+          <th>Situacao</th><th class="text-end">Acoes</th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${agendamentosHoje}">
+          <td th:text="${a.horaInicioFormatada} + ' - ' + ${a.horaFimFormatada}">09:00</td>
+          <td th:text="${a.cliente.nome}">Cliente</td>
+          <td th:text="${a.servico.nome}">Servico</td>
+          <td th:text="${a.profissional.nome}">Profissional</td>
+          <td><span class="badge" th:classappend="'sit-' + ${a.situacao.name()}"
+                    th:text="${a.situacao.rotulo}">Agendado</span></td>
+          <td class="text-end">
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/agendamentos/{id}(id=${a.id})}">Abrir</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card p-3">
+    <div class="card-title">Estado do desenvolvimento</div>
+    <p class="mb-1">Esta versao implementa o fluxo integrado do agendamento: cadastros de
+      <b>clientes</b> (RF01), <b>servicos</b> (RF04) e <b>profissionais</b> (RF03), definicao de
+      <b>horarios e bloqueios</b> (RF05 e RF06), <b>consulta de horarios livres</b> (RF07),
+      <b>agendamento, remarcacao e cancelamento</b> (RF08 a RF10), <b>situacao do atendimento</b>
+      (RF11), <b>agenda do dia</b> (RF12) e <b>historico do cliente</b> (RF13).</p>
+    <p class="mb-0 text-secondary">Autenticacao por perfil, notificacoes e relatorios estao previstos
+      para a entrega de 27/11.</p>
+  </div>
+
+  <footer class="mt-5 mb-4">
+    AgendaPro &middot; Equipe 1 &middot; Fabrica de Software &middot; entrega de 06/11/2026
+  </footer>
+</div>
+</body>
+</html>

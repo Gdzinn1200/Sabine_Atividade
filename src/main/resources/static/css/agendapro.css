@@ -1,0 +1,37 @@
+:root{
+  --azul-escuro:#1F3864; --azul:#2E75B6; --fundo:#F5F7FA; --verde:#2E7D32;
+  --verde-esc:#1F6F24; --ambar:#E8A33D; --vermelho:#C0392B; --vinho:#8C2E22;
+  --borda:#E3E8F0; --texto2:#6B7280;
+}
+body{background:var(--fundo);color:#333;font-family:'Segoe UI',Arial,sans-serif}
+.navbar-agendapro{background:var(--azul-escuro)}
+.navbar-agendapro .navbar-brand{font-weight:700;color:#fff}
+.navbar-agendapro .navbar-brand span{color:#8FB8E8}
+.navbar-agendapro .nav-link{color:#D7E1F2}
+.navbar-agendapro .nav-link:hover{color:#fff}
+.navbar-agendapro .nav-link.active{color:#fff;font-weight:600;border-bottom:3px solid var(--ambar)}
+.card{border:1px solid var(--borda);border-radius:8px}
+.card h2,.card-title{font-size:1.05rem;color:#2E5496;font-weight:600}
+.btn-primary{background:var(--azul);border-color:var(--azul);font-weight:600}
+.btn-outline-primary{color:var(--azul);border-color:var(--azul)}
+.btn-danger{background:var(--vermelho);border-color:var(--vermelho);font-weight:600}
+table thead th{background:#EEF2F9;color:var(--azul-escuro);font-size:.85rem}
+.badge-ativo{background:var(--verde)}
+.badge-inativo{background:#8C939E}
+.badge-bloqueado{background:var(--vermelho)}
+.sit-AGENDADO{background:var(--ambar)}
+.sit-CONFIRMADO{background:var(--verde)}
+.sit-EM_ATENDIMENTO{background:var(--azul)}
+.sit-CONCLUIDO{background:var(--verde-esc)}
+.sit-CANCELADO{background:var(--vermelho)}
+.sit-NAO_COMPARECEU{background:var(--vinho)}
+.obrigatorio{color:var(--vermelho)}
+.form-text{color:var(--texto2)}
+.vazio{text-align:center;padding:2rem;color:var(--texto2)}
+.slots{display:flex;flex-wrap:wrap;gap:.5rem}
+.slot{padding:.5rem .75rem;border:1px solid #C9D2E0;border-radius:6px;background:#fff;
+      font-size:.95rem;font-family:inherit;color:#333;cursor:pointer}
+.slot:hover{background:var(--azul);color:#fff;border-color:var(--azul)}
+.slot.off{background:#F0F1F3;color:#A0A6B0;text-decoration:line-through;cursor:not-allowed}
+.slot.off:hover{background:#F0F1F3;color:#A0A6B0;border-color:#C9D2E0}
+footer{color:var(--texto2);font-size:.85rem}

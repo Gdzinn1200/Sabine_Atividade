@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Servicos &middot; AgendaPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/agendapro.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-agendapro mb-4">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">Agenda<span>Pro</span></a>
+    <div class="navbar-nav flex-wrap">
+      <a class="nav-link" th:href="@{/}">Inicio</a>
+      <a class="nav-link" th:href="@{/agenda}">Agenda</a>
+      <a class="nav-link" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+      <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+      <a class="nav-link" th:href="@{/profissionais}">Profissionais</a>
+      <a class="nav-link active" th:href="@{/servicos}">Servicos</a>
+      <a class="nav-link" th:href="@{/horarios}">Horarios</a>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+  <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+  <div class="card p-3">
+    <div class="card-title">Servicos cadastrados (<span th:text="${#lists.size(servicos)}">0</span>)</div>
+    <div th:if="${#lists.isEmpty(servicos)}" class="vazio">
+      <p>Nenhum servico cadastrado.</p>
+      <a class="btn btn-primary" th:href="@{/servicos/novo}">Cadastrar o primeiro servico</a>
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(servicos)}">
+      <table class="table align-middle">
+        <thead><tr><th>Servico</th><th>Duracao</th><th>Preco</th><th>Situacao</th>
+          <th class="text-end">Acoes</th></tr></thead>
+        <tbody>
+        <tr th:each="s : ${servicos}">
+          <td>
+            <b th:text="${s.nome}">Nome</b>
+            <div class="form-text" th:if="${s.descricao != null}" th:text="${s.descricao}"></div>
+          </td>
+          <td><span th:text="${s.duracaoMinutos}">0</span> min</td>
+          <td th:text="'R$ ' + ${#numbers.formatDecimal(s.preco, 1, 'POINT', 2, 'COMMA')}">R$ 0,00</td>
+          <td>
+            <span class="badge badge-ativo" th:if="${s.ativo}">Ativo</span>
+            <span class="badge badge-inativo" th:unless="${s.ativo}">Inativo</span>
+          </td>
+          <td class="text-end">
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/servicos/{id}/editar(id=${s.id})}">Editar</a>
+            <form th:if="${s.ativo}" class="d-inline" method="post"
+                  th:action="@{/servicos/{id}/inativar(id=${s.id})}">
+              <button class="btn btn-outline-primary btn-sm" type="submit">Inativar</button>
+            </form>
+            <form th:unless="${s.ativo}" class="d-inline" method="post"
+                  th:action="@{/servicos/{id}/reativar(id=${s.id})}">
+              <button class="btn btn-outline-primary btn-sm" type="submit">Reativar</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="mt-3">
+      <a class="btn btn-primary" th:href="@{/servicos/novo}">Novo servico</a>
+    </div>
+  </div>
+
+  <footer class="mt-5 mb-4">
+    AgendaPro &middot; Equipe 1 &middot; Fabrica de Software &middot; entrega de 06/11/2026
+  </footer>
+</div>
+</body>
+</html>

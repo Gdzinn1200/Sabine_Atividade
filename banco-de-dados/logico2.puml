@@ -1,0 +1,72 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F3864
+  HeaderBackgroundColor #D9E2F3
+}
+hide circle
+hide methods
+title Parte 2 - Agendamentos
+
+entity "cliente" as cliente #F2F2F2 {
+  <b>id_cliente</b> : INT <<PK>>
+}
+entity "profissional" as profissional #F2F2F2 {
+  <b>id_profissional</b> : INT <<PK>>
+}
+entity "servico" as servico #F2F2F2 {
+  <b>id_servico</b> : INT <<PK>>
+}
+entity "usuario" as usuario #F2F2F2 {
+  <b>id_usuario</b> : INT <<PK>>
+}
+entity "agendamento" as agendamento {
+  <b>id_agendamento</b> : INT <<PK>>
+  --
+  * id_cliente : INT <<FK>>
+  * id_profissional : INT <<FK>>
+  * id_servico : INT <<FK>>
+  * data_hora_inicio : DATETIME
+  * data_hora_fim : DATETIME
+  * situacao : ENUM
+  * valor : DECIMAL(10,2)
+  observacao : VARCHAR(255)
+  * criado_em : DATETIME
+}
+entity "historico_situacao" as historico {
+  <b>id_historico</b> : INT <<PK>>
+  --
+  * id_agendamento : INT <<FK>>
+  * id_usuario : INT <<FK>>
+  situacao_anterior : ENUM
+  * situacao_nova : ENUM
+  * data_hora : DATETIME
+  motivo : VARCHAR(255)
+}
+entity "notificacao" as notificacao {
+  <b>id_notificacao</b> : INT <<PK>>
+  --
+  * id_agendamento : INT <<FK>>
+  * tipo : ENUM
+  * destinatario : VARCHAR(120)
+  data_hora_envio : DATETIME
+  * enviada : BOOLEAN
+}
+
+cliente ||--o{ agendamento
+profissional ||--o{ agendamento
+servico ||--o{ agendamento
+agendamento ||--o{ historico
+agendamento ||--o{ notificacao
+usuario ||--o{ historico
+
+legend bottom
+  Tabelas em cinza estão detalhadas na Parte 1; aqui aparecem apenas com a chave primária.
+  * campo obrigatório  |  PK chave primária  |  FK chave estrangeira
+endlegend
+@enduml

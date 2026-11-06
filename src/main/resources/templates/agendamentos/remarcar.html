@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Remarcar agendamento &middot; AgendaPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/agendapro.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-agendapro mb-4">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">Agenda<span>Pro</span></a>
+    <div class="navbar-nav flex-wrap">
+      <a class="nav-link" th:href="@{/}">Inicio</a>
+      <a class="nav-link active" th:href="@{/agenda}">Agenda</a>
+      <a class="nav-link" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+      <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+      <a class="nav-link" th:href="@{/profissionais}">Profissionais</a>
+      <a class="nav-link" th:href="@{/servicos}">Servicos</a>
+      <a class="nav-link" th:href="@{/horarios}">Horarios</a>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+  <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+  <div class="card p-3 mb-3">
+    <div class="card-title">Remarcando o agendamento #<span th:text="${agendamento.id}">0</span></div>
+    <p class="mb-2">
+      <b th:text="${agendamento.cliente.nome}">Cliente</b> -
+      <span th:text="${agendamento.servico.nome}">Servico</span> com
+      <span th:text="${agendamento.profissional.nome}">Profissional</span>.
+      Atualmente em <b th:text="${agendamento.dataFormatada} + ' as ' + ${agendamento.horaInicioFormatada}">data</b>.
+    </p>
+    <form class="row g-2 align-items-end" method="get"
+          th:action="@{/agendamentos/{id}/remarcar(id=${agendamento.id})}">
+      <div class="col-md-3">
+        <label class="form-label">Nova data</label>
+        <input class="form-control" type="date" name="data" th:value="${data}">
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-outline-primary" type="submit">Ver horarios</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-3">
+    <div class="card-title">Horarios disponiveis</div>
+    <div th:if="${livres == 0}" class="vazio">
+      <p>Nenhum horario livre nesta data. Escolha outra data.</p>
+    </div>
+    <form th:if="${livres > 0}" method="post"
+          th:action="@{/agendamentos/{id}/remarcar(id=${agendamento.id})}">
+      <input type="hidden" name="data" th:value="${data}">
+      <div class="slots mb-3">
+        <span th:each="h : ${horarios}">
+          <button th:if="${h.livre}" class="slot" type="submit" name="hora" th:value="${h.rotulo}"
+                  th:text="${h.rotulo}">00:00</button>
+          <span th:unless="${h.livre}" class="slot off" th:title="${h.motivo}"
+                th:text="${h.rotulo}">00:00</span>
+        </span>
+      </div>
+      <div class="form-text">O horario atual continua reservado ate a confirmacao da remarcacao.</div>
+    </form>
+    <div class="mt-3">
+      <a class="btn btn-outline-primary"
+         th:href="@{/agendamentos/{id}(id=${agendamento.id})}">Voltar</a>
+    </div>
+  </div>
+
+  <footer class="mt-5 mb-4">
+    AgendaPro &middot; Equipe 1 &middot; Fabrica de Software &middot; entrega de 06/11/2026
+  </footer>
+</div>
+</body>
+</html>

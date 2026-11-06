@@ -1,0 +1,55 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 14
+skinparam activity {
+  BackgroundColor #D9E2F3
+  BorderColor #1F3864
+  DiamondBackgroundColor #FFFFFF
+  DiamondBorderColor #1F3864
+}
+skinparam swimlane {
+  BorderColor #1F3864
+  TitleFontColor #1F3864
+}
+title Processo 1 - Realizar agendamento
+
+|Usuário (cliente ou administrador)|
+start
+:Acessa a tela de novo agendamento;
+:Seleciona o cliente, o serviço e o
+profissional habilitado (RN06);
+:Informa a data desejada;
+|Sistema|
+:Calcula os horários livres do profissional
+considerando a duração do serviço, os horários
+de atendimento e os bloqueios (RN01, RN02, RN03);
+if (Há horário disponível na data?) then (não)
+  |Usuário (cliente ou administrador)|
+  :Visualiza o aviso de indisponibilidade
+  e informa outra data;
+  stop
+else (sim)
+endif
+|Usuário (cliente ou administrador)|
+:Escolhe o horário e confirma;
+|Sistema|
+:Valida as demais regras do agendamento
+(RN04, RN08 e RN10);
+if (Todas as regras foram atendidas?) then (não)
+  |Usuário (cliente ou administrador)|
+  :Visualiza a mensagem indicando
+  a regra não atendida;
+  stop
+else (sim)
+endif
+|Sistema|
+:Grava o agendamento com a situação "Agendado";
+:Registra o log da operação (RNF10);
+:Envia o e-mail de confirmação (RF14);
+|Usuário (cliente ou administrador)|
+:Visualiza a mensagem de sucesso e o
+agendamento na agenda;
+stop
+@enduml

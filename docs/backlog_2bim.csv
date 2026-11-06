@@ -1,0 +1,29 @@
+ID,Tarefa,Requisito ou regra,Responsavel,Prazo,Prioridade,Situacao,Criterio de conclusao
+T21,"Configurar projeto Spring Boot, Maven e conexao MySQL",-,Gabriel,20/10/2026,Alta,Concluida,A aplicacao sobe com mvn spring-boot:run e conecta no banco agendapro
+T22,"Criar entidades Cliente e Servico mapeadas no banco",RF01 e RF04,Gabriel,20/10/2026,Alta,Concluida,As entidades refletem as tabelas do modelo logico sem alterar o script
+T23,"Implementar regras de validacao do cliente",RF01 e RN07,Joao Guilherme,20/10/2026,Alta,Concluida,Dados validos sao aceitos e duplicidade de e-mail ou telefone entre ativos e recusada
+T24,"Implementar telas de cadastro e consulta de clientes",RF01,Thiago,20/10/2026,Alta,Concluida,Cadastro salva e aparece na listagem com busca por nome telefone e e-mail
+T25,"Implementar inativacao de cliente",RN12,Thiago,20/10/2026,Alta,Concluida,Cliente inativado continua no banco e aparece no filtro Todos
+T26,"Implementar regras de validacao do servico",RF04 RN03 e RN14,Carlos Alexandre,20/10/2026,Alta,Concluida,Duracao menor que 5 minutos e nome repetido entre ativos sao recusados
+T27,"Implementar telas de cadastro e consulta de servicos",RF04,Luiz Henrique,20/10/2026,Alta,Concluida,Servico salva com duracao e preco e aparece na listagem
+T28,"Escrever e executar os testes das regras de cadastro",RF01 RF04 RN03 RN07 RN14,Joao Guilherme,20/10/2026,Alta,Concluida,Os 11 casos automatizados executam e passam
+T29,"Atualizar README documentacao e rastreabilidade",-,Gabriel,20/10/2026,Alta,Concluida,Outro integrante consegue rodar o projeto seguindo o README
+T30,"Executar e registrar os testes manuais com evidencias",RF01 e RF04,Thiago,06/11/2026,Alta,Em andamento,Casos CTM01 a CTM08 executados com captura de tela
+T31,"Implementar cadastro de profissionais e vinculo com servicos",RF03 e RN06,Thiago,06/11/2026,Alta,Concluida,Profissional cadastrado aparece apenas nos servicos que executa
+T32,"Implementar horarios de atendimento e bloqueios",RF05 RF06 e RN02,Carlos Alexandre,06/11/2026,Alta,Concluida,Faixas e bloqueios gravados e considerados no calculo de horarios
+T33,"Implementar calculo dos horarios disponiveis",RF07 RN01 RN02 e RN03,Joao Guilherme,06/11/2026,Alta,Concluida,A tela mostra apenas horarios livres do profissional na data
+T34,"Implementar gravacao do agendamento",RF08 RN04 RN08 e RN10,Joao Guilherme,06/11/2026,Alta,Concluida,Agendamento gravado como Agendado e horario deixa de ser oferecido
+T35,"Implementar tela de agenda do dia com filtros",RF12,Luiz Henrique,06/11/2026,Alta,Concluida,Agenda lista os atendimentos do dia com filtros por profissional e situacao
+T36,"Implementar remarcacao e cancelamento com motivo",RF09 RF10 e RN05,Joao Guilherme,06/11/2026,Alta,Concluida,Remarcacao valida o novo horario e cancelamento exige motivo e libera a agenda
+T37,"Implementar situacao do atendimento e historico",RF11 RN09 e RNF10,Luiz Henrique,06/11/2026,Alta,Concluida,As acoes mudam conforme a situacao e cada alteracao fica registrada
+T38,"Implementar historico de atendimentos do cliente",RF13,Thiago,06/11/2026,Media,Concluida,A tela lista os atendimentos anteriores com valor e situacao final
+T39,"Implementar bloqueio automatico por faltas",RN10,Carlos Alexandre,06/11/2026,Media,Concluida,Tres faltas em noventa dias bloqueiam o cliente para novo agendamento
+T40,"Escrever e executar os testes das regras de agenda",RF07 RF08 RN01 RN02 RN04 RN05 RN08 RN09 RN10,Joao Guilherme,06/11/2026,Alta,Concluida,Os casos CT12 a CT33 executam e passam
+T41,"Preparar dados de demonstracao com datas relativas",-,Gabriel,06/11/2026,Media,Concluida,A agenda do dia aparece preenchida em qualquer data de execucao
+T42,"Atualizar documentacao rastreabilidade e backlog",-,Gabriel,06/11/2026,Alta,Concluida,README e rastreabilidade refletem o que esta implementado
+T43,"Implementar autenticacao perfis e permissoes",RF02 RF17 e RNF02,Carlos Alexandre,27/11/2026,Alta,A fazer,Cada perfil acessa somente as telas e acoes previstas
+T44,"Implementar notificacoes de confirmacao e lembrete",RF14 RF15 e RN11,Carlos Alexandre,27/11/2026,Media,A fazer,Mensagem registrada ao criar alterar e cancelar e lembrete unico 24h antes
+T45,"Implementar relatorios de atendimentos",RF16 e RN13,Carlos Alexandre,27/11/2026,Media,A fazer,Relatorio por periodo profissional e servico com totais e acesso restrito
+T46,"Implementar recuperacao de senha",RF18,Gabriel,27/11/2026,Baixa,A fazer,Usuario solicita redefinicao por link temporario enviado ao e-mail
+T47,"Revisar responsividade e mensagens de validacao",RNF05 e RNF06,Luiz Henrique,27/11/2026,Media,A fazer,Telas funcionam a partir de 320 px sem rolagem horizontal
+T48,"Consolidar documentacao e preparar apresentacao final",-,Equipe,27/11/2026,Alta,A fazer,Documentacao consolidada e roteiro ensaiado com todos os integrantes

@@ -1,0 +1,86 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam linetype ortho
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F3864
+  HeaderBackgroundColor #D9E2F3
+}
+hide circle
+hide methods
+
+entity "USUÁRIO" as usuario {
+  nome
+  e-mail de acesso
+  senha
+  perfil
+  situação: ativo ou inativo
+  data de cadastro
+}
+entity "CLIENTE" as cliente {
+  nome
+  telefone
+  e-mail
+  data de nascimento
+  situação
+  bloqueado por faltas
+}
+entity "PROFISSIONAL" as profissional {
+  nome
+  telefone
+  e-mail
+  situação
+}
+entity "SERVIÇO" as servico {
+  nome
+  descrição
+  duração em minutos
+  preço
+  situação
+}
+entity "HORÁRIO DE ATENDIMENTO" as horario {
+  dia da semana
+  hora inicial
+  hora final
+}
+entity "BLOQUEIO DE AGENDA" as bloqueio {
+  data e hora inicial
+  data e hora final
+  motivo
+}
+entity "AGENDAMENTO" as agendamento {
+  data e hora inicial
+  data e hora final
+  situação do atendimento
+  valor
+  observação
+  data de criação
+}
+entity "HISTÓRICO DE SITUAÇÃO" as historico {
+  situação anterior
+  situação nova
+  data e hora
+  motivo
+}
+entity "NOTIFICAÇÃO" as notificacao {
+  tipo: confirmação ou lembrete
+  destinatário
+  data e hora do envio
+  situação do envio
+}
+
+usuario "1" -- "0..1" cliente : possui acesso >
+usuario "1" -- "0..1" profissional : possui acesso >
+profissional "1..*" -- "1..*" servico : executa >
+profissional "1" -- "1..*" horario : possui >
+profissional "1" -- "0..*" bloqueio : registra >
+cliente "1" -- "0..*" agendamento : solicita >
+profissional "1" -- "0..*" agendamento : atende >
+servico "1" -- "0..*" agendamento : compõe >
+agendamento "1" -- "0..*" historico : registra >
+agendamento "1" -- "0..*" notificacao : gera >
+usuario "1" -- "0..*" historico : responsável por >
+@enduml

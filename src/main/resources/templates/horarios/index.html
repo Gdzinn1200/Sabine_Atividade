@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Horarios e bloqueios &middot; AgendaPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/agendapro.css}" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-agendapro mb-4">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">Agenda<span>Pro</span></a>
+    <div class="navbar-nav flex-wrap">
+      <a class="nav-link" th:href="@{/}">Inicio</a>
+      <a class="nav-link" th:href="@{/agenda}">Agenda</a>
+      <a class="nav-link" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+      <a class="nav-link" th:href="@{/clientes}">Clientes</a>
+      <a class="nav-link" th:href="@{/profissionais}">Profissionais</a>
+      <a class="nav-link" th:href="@{/servicos}">Servicos</a>
+      <a class="nav-link active" th:href="@{/horarios}">Horarios</a>
+    </div>
+  </div>
+</nav>
+<div class="container">
+  <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+  <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+  <div class="card p-3 mb-3">
+    <form class="row g-2 align-items-end" th:action="@{/horarios}" method="get">
+      <div class="col-md-5">
+        <label class="form-label">Profissional</label>
+        <select class="form-select" name="profissional">
+          <option th:each="p : ${profissionais}" th:value="${p.id}"
+                  th:selected="${escolhido != null and escolhido == p.id}"
+                  th:text="${p.nome}">Nome</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary" type="submit">Carregar agenda</button>
+      </div>
+    </form>
+    <div class="alert alert-warning mt-3 mb-0" th:if="${escolhido == null}">
+      Nenhum profissional ativo cadastrado. Cadastre um profissional antes de definir horarios.
+    </div>
+  </div>
+
+  <div class="row g-3" th:if="${escolhido != null}">
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <div class="card-title">Horarios de atendimento (RF05)</div>
+        <div th:if="${#lists.isEmpty(faixas)}" class="vazio">
+          <p>Nenhuma faixa cadastrada. Sem faixa, o profissional nao oferece horarios (RN02).</p>
+        </div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(faixas)}">
+          <table class="table align-middle">
+            <thead><tr><th>Dia</th><th>Inicio</th><th>Fim</th><th class="text-end">Acoes</th></tr></thead>
+            <tbody>
+            <tr th:each="f : ${faixas}">
+              <td th:text="${f.nomeDia}">Dia</td>
+              <td th:text="${f.horaInicio}">08:00</td>
+              <td th:text="${f.horaFim}">18:00</td>
+              <td class="text-end">
+                <form method="post" th:action="@{/horarios/faixas/{id}/remover(id=${f.id})}">
+                  <input type="hidden" name="profissional" th:value="${escolhido}">
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Remover</button>
+                </form>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <form class="row g-2 align-items-end mt-2" th:action="@{/horarios/faixas}" method="post">
+          <input type="hidden" name="profissional" th:value="${escolhido}">
+          <div class="col-md-5">
+            <label class="form-label">Dia</label>
+            <select class="form-select" name="diaSemana">
+              <option value="1">Domingo</option>
+              <option value="2" selected>Segunda-feira</option>
+              <option value="3">Terca-feira</option>
+              <option value="4">Quarta-feira</option>
+              <option value="5">Quinta-feira</option>
+              <option value="6">Sexta-feira</option>
+              <option value="7">Sabado</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Inicio</label>
+            <input class="form-control" type="time" name="inicio" value="08:00">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Fim</label>
+            <input class="form-control" type="time" name="fim" value="18:00">
+          </div>
+          <div class="col-12 mt-2">
+            <button class="btn btn-primary" type="submit">Adicionar faixa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card p-3">
+        <div class="card-title">Bloqueios de agenda (RF06)</div>
+        <div th:if="${#lists.isEmpty(bloqueios)}" class="vazio">
+          <p>Nenhum bloqueio registrado.</p>
+        </div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(bloqueios)}">
+          <table class="table align-middle">
+            <thead><tr><th>Inicio</th><th>Fim</th><th>Motivo</th><th class="text-end">Acoes</th></tr></thead>
+            <tbody>
+            <tr th:each="b : ${bloqueios}">
+              <td th:text="${b.inicioFormatado}">inicio</td>
+              <td th:text="${b.fimFormatado}">fim</td>
+              <td th:text="${b.motivo != null} ? ${b.motivo} : '-'">-</td>
+              <td class="text-end">
+                <form method="post" th:action="@{/horarios/bloqueios/{id}/remover(id=${b.id})}">
+                  <input type="hidden" name="profissional" th:value="${escolhido}">
+                  <button class="btn btn-outline-primary btn-sm" type="submit">Remover</button>
+                </form>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <form class="row g-2 align-items-end mt-2" th:action="@{/horarios/bloqueios}" method="post">
+          <input type="hidden" name="profissional" th:value="${escolhido}">
+          <div class="col-md-4">
+            <label class="form-label">Data</label>
+            <input class="form-control" type="date" name="data" th:value="${hoje}">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Inicio</label>
+            <input class="form-control" type="time" name="inicio" value="12:00">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Fim</label>
+            <input class="form-control" type="time" name="fim" value="13:00">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Motivo</label>
+            <input class="form-control" type="text" name="motivo" placeholder="Almoco, feriado, compromisso">
+          </div>
+          <div class="col-12 mt-2">
+            <button class="btn btn-primary" type="submit">Registrar bloqueio</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5 mb-4">
+    AgendaPro &middot; Equipe 1 &middot; Fabrica de Software &middot; entrega de 06/11/2026
+  </footer>
+</div>
+</body>
+</html>

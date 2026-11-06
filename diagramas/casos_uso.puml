@@ -1,0 +1,81 @@
+@startuml
+skinparam backgroundColor transparent
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 13
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #D9E2F3
+  BorderColor #1F3864
+  FontColor #1A1A1A
+}
+skinparam actor {
+  BorderColor #1F3864
+  BackgroundColor #FFFFFF
+}
+left to right direction
+
+actor "Administrador" as adm
+actor "Profissional" as prof
+actor "Cliente" as cli
+actor "Agendador\n(tempo)" as tempo
+
+rectangle "AgendaPro" {
+  usecase "UC01 - Autenticar usuário" as UC01
+  usecase "UC02 - Recuperar senha" as UC02
+  usecase "UC03 - Manter clientes" as UC03
+  usecase "UC04 - Manter profissionais" as UC04
+  usecase "UC05 - Manter serviços" as UC05
+  usecase "UC06 - Definir horários de atendimento" as UC06
+  usecase "UC07 - Registrar bloqueios de agenda" as UC07
+  usecase "UC08 - Consultar horários disponíveis" as UC08
+  usecase "UC09 - Realizar agendamento" as UC09
+  usecase "UC10 - Alterar agendamento" as UC10
+  usecase "UC11 - Cancelar agendamento" as UC11
+  usecase "UC12 - Atualizar situação do atendimento" as UC12
+  usecase "UC13 - Consultar agenda" as UC13
+  usecase "UC14 - Consultar histórico do cliente" as UC14
+  usecase "UC15 - Emitir relatórios" as UC15
+  usecase "UC16 - Gerenciar usuários e permissões" as UC16
+  usecase "UC17 - Enviar confirmação" as UC17
+  usecase "UC18 - Enviar lembrete automático" as UC18
+}
+
+adm --> UC01
+adm --> UC03
+adm --> UC04
+adm --> UC05
+adm --> UC06
+adm --> UC07
+adm --> UC09
+adm --> UC10
+adm --> UC11
+adm --> UC12
+adm --> UC13
+adm --> UC14
+adm --> UC15
+adm --> UC16
+
+prof --> UC01
+prof --> UC06
+prof --> UC07
+prof --> UC12
+prof --> UC13
+prof --> UC14
+
+cli --> UC01
+cli --> UC02
+cli --> UC08
+cli --> UC09
+cli --> UC10
+cli --> UC11
+cli --> UC14
+
+tempo --> UC18
+
+UC09 ..> UC08 : <<include>>
+UC10 ..> UC08 : <<include>>
+UC09 ..> UC17 : <<include>>
+UC10 ..> UC17 : <<include>>
+UC11 ..> UC17 : <<include>>
+@enduml
