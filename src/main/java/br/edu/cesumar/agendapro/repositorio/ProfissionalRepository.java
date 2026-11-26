@@ -8,5 +8,7 @@ public interface ProfissionalRepository extends JpaRepository<Profissional, Long
 
     List<Profissional> findAllByOrderByNome();
 
+    java.util.Optional<Profissional> findByIdUsuario(Long idUsuario);
+
     List<Profissional> findByAtivoTrueOrderByNome();
 }

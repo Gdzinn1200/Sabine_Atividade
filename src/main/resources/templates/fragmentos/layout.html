@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<!--
+  Fragmentos reaproveitados por todas as telas.
+  O menu nao e fixo: ele vem de RegrasAcesso.menuDe(perfil), a mesma classe que o
+  filtro de requisicoes usa. Assim o que aparece no menu e exatamente o que o
+  perfil pode abrir (RNF02).
+-->
+<head th:fragment="cabeca(titulo)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:text="${titulo} + ' &middot; AgendaPro'">AgendaPro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link th:href="@{/css/agendapro.css}" rel="stylesheet">
+</head>
+<body>
+
+<nav th:fragment="topo" class="navbar navbar-expand-lg navbar-agendapro mb-4">
+  <div class="container">
+    <a class="navbar-brand" th:href="@{/}">Agenda<span>Pro</span></a>
+    <div class="navbar-nav flex-wrap me-auto">
+      <a class="nav-link" th:each="area : ${menu}"
+         th:href="@{${area.caminho}}"
+         th:text="${area.rotulo}"
+         th:classappend="${area.caminho} == ${caminhoAtual} ? 'active' : ''">Item</a>
+    </div>
+    <div class="identificacao" th:if="${usuario != null}">
+      <span class="quem" th:text="${usuario.nome}">Usuario</span>
+      <span class="papel" th:text="${usuario.perfil.rotulo}">Perfil</span>
+      <a class="btn btn-sm btn-outline-light" th:href="@{/logout}">Sair</a>
+    </div>
+  </div>
+</nav>
+
+<footer th:fragment="rodape" class="mt-5 mb-4">
+  AgendaPro &middot; Equipe 1 &middot; Fabrica de Software &middot; entrega final de 27/11/2026
+</footer>
+
+<div th:fragment="recados">
+  <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+  <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+  <div th:if="${aviso}" class="alert alert-warning" th:text="${aviso}"></div>
+</div>
+</body>
+</html>

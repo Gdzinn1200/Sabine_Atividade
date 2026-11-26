@@ -1,0 +1,86 @@
+AgendaPro - Equipe 1 - Fabrica de Software
+Evidencia de execucao dos testes de regra de negocio
+Entrega final de 27/11/2026
+
+Comandos executados:
+  javac -d build $(find src/main/java/br/edu/cesumar/agendapro/dominio/regras -name "*.java") ferramentas/TesteRegras.java
+  java -cp build TesteRegras
+
+Versao do JDK:
+  openjdk version "21.0.13.1" 2026-11-17
+  OpenJDK Runtime Environment (build 21.0.13.1+2-1-24.04.1-Ubuntu)
+  OpenJDK 64-Bit Server VM (build 21.0.13.1+2-1-24.04.1-Ubuntu, mixed mode, sharing)
+
+===============================================================================
+AgendaPro - execucao dos testes de regra de negocio
+Data da execucao: 2026-11-26T19:26:22
+-------------------------------------------------------------------------------
+Caso    Requisito / regra      Verificacao                                  Resultado
+-------------------------------------------------------------------------------
+CT01    RF01                   Cadastrar cliente com dados validos          APROVADO
+CT02    RF01 / RNF05           Recusar nome e telefone vazios               APROVADO
+CT03    RN07                   Recusar e-mail repetido de cliente ativo     APROVADO
+CT04    RN07                   Permitir telefone de cliente inativo         APROVADO
+CT05    RN07                   Editar o proprio cadastro sem acusar duplicidade APROVADO
+CT06    RNF05                  Recusar e-mail em formato invalido           APROVADO
+CT07    RF04                   Cadastrar servico com dados validos          APROVADO
+CT08    RN03                   Recusar servico sem duracao valida           APROVADO
+CT09    RN14                   Recusar nome de servico repetido             APROVADO
+CT10    RN03                   Calcular o horario final pela duracao        APROVADO
+CT11    RNF05                  Recusar preco negativo                       APROVADO
+CT12    RN01                   Detectar sobreposicao de horario do profissional APROVADO
+CT13    RN01                   Aceitar atendimentos encostados, sem sobreposicao APROVADO
+CT14    RN01                   Horario de atendimento cancelado volta a ficar livre APROVADO
+CT15    RN02                   Recusar horario fora da faixa de atendimento APROVADO
+CT16    RN02                   Detectar bloqueio de agenda no periodo       APROVADO
+CT17    RF07                   Grade marca ocupados, bloqueados e livres    APROVADO
+CT18    RN04                   Horarios ja passados nao sao oferecidos      APROVADO
+CT19    RN06                   Recusar profissional que nao executa o servico APROVADO
+CT20    RN08                   Recusar o quarto agendamento futuro do cliente APROVADO
+CT21    RN10                   Contar faltas na janela de 90 dias e bloquear o cliente APROVADO
+CT22    RN10                   Recusar agendamento de cliente bloqueado por faltas APROVADO
+CT23    RN04                   Recusar agendamento em data ja passada       APROVADO
+CT24    RN01                   Recusar agendamento sobreposto a outro atendimento APROVADO
+CT25    RF08                   Aceitar agendamento que atende a todas as regras APROVADO
+CT26    RF05 / RN02            Recusar faixa invertida e faixa sobreposta   APROVADO
+CT27    RN09                   Permitir a sequencia Agendado - Confirmado - Em atendimento - Concluido APROVADO
+CT28    RN09                   Recusar salto de Agendado direto para Concluido APROVADO
+CT29    RN09                   Recusar alteracao de atendimento em situacao final APROVADO
+CT30    RN05                   Recusar cancelamento do cliente com menos de 4 horas APROVADO
+CT31    RN05                   Permitir cancelamento do cliente com mais de 4 horas APROVADO
+CT32    RN05                   Permitir cancelamento pelo estabelecimento a qualquer momento APROVADO
+CT33    RF10 / RNF05           Exigir o motivo do cancelamento              APROVADO
+CT34    RNF02                  Administrador abre os relatorios             APROVADO
+CT35    RNF02 / RN13           Cliente nao abre os relatorios               APROVADO
+CT36    RNF02                  Profissional abre a agenda                   APROVADO
+CT37    RNF02                  Profissional nao abre o cadastro de usuarios APROVADO
+CT38    RNF02                  Cliente marca o proprio atendimento          APROVADO
+CT39    RNF02                  Visitante so acessa as telas publicas        APROVADO
+CT40    RNF02                  Menu do cliente so mostra o que ele pode abrir APROVADO
+CT41    RNF02                  Quadro de permissoes acompanha o filtro      APROVADO
+CT42    RNF01                  Senha e gravada apenas como hash com sal     APROVADO
+CT43    RNF01                  Senha correta e aceita                       APROVADO
+CT44    RNF01                  Senha errada e recusada                      APROVADO
+CT45    RNF01                  Sal diferente a cada cadastro                APROVADO
+CT46    RNF01                  Senha curta e recusada                       APROVADO
+CT47    RNF01                  Confirmacao diferente e recusada             APROVADO
+CT48    RF18                   Token de recuperacao nao se repete           APROVADO
+CT49    RN11                   Lembrete sai nas 24 horas anteriores         APROVADO
+CT50    RN11                   Lembrete nao se repete no mesmo atendimento  APROVADO
+CT51    RN11                   Atendimento distante ainda nao gera lembrete APROVADO
+CT52    RN11                   Atendimento cancelado nao gera lembrete      APROVADO
+CT53    RN11                   Atendimento passado nao gera lembrete        APROVADO
+CT54    RN11                   Rotina separa apenas quem precisa de lembrete APROVADO
+CT55    RF14                   Cancelamento gera aviso de cancelamento      APROVADO
+CT56    RF14                   Destinatario sem e-mail nao recebe aviso     APROVADO
+CT57    RF16                   Relatorio considera apenas o periodo pedido  APROVADO
+CT58    RF16                   Faturamento soma somente atendimentos concluidos APROVADO
+CT59    RF16                   Resumo separa concluidos, cancelados e faltas APROVADO
+CT60    RF16                   Taxa de comparecimento desconsidera cancelados APROVADO
+CT61    RF16                   Totais agrupados por profissional            APROVADO
+CT62    RF16                   Totais agrupados por servico                 APROVADO
+CT63    RN13                   Periodo invertido e recusado                 APROVADO
+CT64    RN13                   Periodo acima de 365 dias e recusado         APROVADO
+CT65    RN13                   Periodo valido e aceito                      APROVADO
+-------------------------------------------------------------------------------
+Total: 65 caso(s) | Aprovados: 65 | Reprovados: 0

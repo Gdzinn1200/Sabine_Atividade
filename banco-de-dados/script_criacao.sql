@@ -18,6 +18,7 @@ CREATE TABLE usuario (
   perfil         ENUM('ADMINISTRADOR','PROFISSIONAL','CLIENTE') NOT NULL,
   ativo          BOOLEAN       NOT NULL DEFAULT TRUE,
   data_cadastro  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ultimo_acesso  DATETIME      NULL,                -- preenchido a cada login (RNF01)
   CONSTRAINT pk_usuario PRIMARY KEY (id_usuario),
   CONSTRAINT uk_usuario_email UNIQUE (email)   -- RN07
 ) ENGINE=InnoDB;
@@ -150,14 +151,39 @@ CREATE TABLE historico_situacao (
 ) ENGINE=InnoDB;
 
 -- ----------------------------------------------------------- notificacao
+-- O aviso de recuperacao de senha nao pertence a nenhum atendimento, por isso
+-- id_agendamento aceita NULL desde a entrega de 27/11.
 CREATE TABLE notificacao (
   id_notificacao    INT          NOT NULL AUTO_INCREMENT,
-  id_agendamento    INT          NOT NULL,
-  tipo              ENUM('CONFIRMACAO','LEMBRETE','CANCELAMENTO') NOT NULL,
+  id_agendamento    INT          NULL,
+  tipo              ENUM('CONFIRMACAO','LEMBRETE','REMARCACAO',
+                         'CANCELAMENTO','RECUPERACAO_SENHA') NOT NULL,
   destinatario      VARCHAR(120) NOT NULL,
+  assunto           VARCHAR(160) NULL,
   data_hora_envio   DATETIME     NULL,
   enviada           BOOLEAN      NOT NULL DEFAULT FALSE,   -- RN11
   CONSTRAINT pk_notificacao PRIMARY KEY (id_notificacao),
   CONSTRAINT fk_notificacao_agendamento FOREIGN KEY (id_agendamento)
     REFERENCES agendamento (id_agendamento)
 ) ENGINE=InnoDB;
+
+-- Evita o lembrete repetido do mesmo atendimento (RN11).
+CREATE INDEX ix_notificacao_agendamento_tipo
+  ON notificacao (id_agendamento, tipo);
+
+-- ----------------------------------------------------- recuperacao_senha
+-- Pedidos de redefinicao de senha (RF18). O token vale 2 horas e serve uma vez.
+CREATE TABLE recuperacao_senha (
+  id_recuperacao  INT          NOT NULL AUTO_INCREMENT,
+  id_usuario      INT          NOT NULL,
+  token           VARCHAR(64)  NOT NULL,
+  criado_em       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  expira_em       DATETIME     NOT NULL,
+  usado           BOOLEAN      NOT NULL DEFAULT FALSE,
+  CONSTRAINT pk_recuperacao PRIMARY KEY (id_recuperacao),
+  CONSTRAINT uk_recuperacao_token UNIQUE (token),
+  CONSTRAINT fk_recuperacao_usuario FOREIGN KEY (id_usuario)
+    REFERENCES usuario (id_usuario)
+) ENGINE=InnoDB;
+
+CREATE INDEX ix_recuperacao_usuario ON recuperacao_senha (id_usuario);

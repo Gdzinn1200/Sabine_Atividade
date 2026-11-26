@@ -1,0 +1,25 @@
+AgendaPro - Equipe 1 - Fabrica de Software
+Evidencia de compilacao do projeto completo
+Entrega final de 27/11/2026
+
+O Maven Central nao esta acessivel na maquina usada para esta verificacao, entao
+a compilacao foi feita com o javac do JDK, apontando o classpath para assinaturas
+minimas das APIs externas (Jakarta Persistence, Jakarta Servlet, Spring e JUnit).
+Isso confere o codigo do AgendaPro por inteiro: nomes de metodos, tipos, campos das
+entidades e assinaturas entre camadas. Na maquina da apresentacao, com internet, o
+comando equivalente e:
+
+  mvn clean test
+  mvn spring-boot:run
+
+  openjdk version "21.0.13.1" 2026-11-17
+  OpenJDK Runtime Environment (build 21.0.13.1+2-1-24.04.1-Ubuntu)
+  OpenJDK 64-Bit Server VM (build 21.0.13.1+2-1-24.04.1-Ubuntu, mixed mode, sharing)
+
+===============================================================================
+Arquivos .java compilados: 66
+Arquivos .class gerados:   83
+Telas Thymeleaf no projeto: 22
+Erros de compilacao:        0
+
+Resultado: BUILD OK - nenhum erro de compilacao.

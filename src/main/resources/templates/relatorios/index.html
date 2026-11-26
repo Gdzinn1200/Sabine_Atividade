@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Relatorios')}"></head>
+<body>
+<nav th:replace="~{fragmentos/layout :: topo}"></nav>
+<div class="container">
+  <div th:replace="~{fragmentos/layout :: recados}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Relatorio de atendimentos</h1>
+    <span class="text-secondary">RF16 &middot; RN13</span>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <form method="get" th:action="@{/relatorios}" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label" for="de">De</label>
+        <input class="form-control" id="de" name="de" type="date" th:value="${de}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="ate">Ate</label>
+        <input class="form-control" id="ate" name="ate" type="date" th:value="${ate}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="profissional">Profissional</label>
+        <select class="form-select" id="profissional" name="profissional">
+          <option value="">Todos</option>
+          <option th:each="p : ${profissionais}" th:value="${p.id}"
+                  th:selected="${profissional != null and profissional == p.id}"
+                  th:text="${p.nome}">Nome</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="servico">Servico</label>
+        <select class="form-select" id="servico" name="servico">
+          <option value="">Todos</option>
+          <option th:each="s : ${servicos}" th:value="${s.id}"
+                  th:selected="${servico != null and servico == s.id}"
+                  th:text="${s.nome}">Nome</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button class="btn btn-primary w-100" type="submit">Gerar relatorio</button>
+      </div>
+      <div class="col-md-3">
+        <a class="btn btn-outline-primary w-100"
+           th:href="@{/relatorios/csv(de=${de},ate=${ate},profissional=${profissional},servico=${servico})}">Baixar
+          CSV</a>
+      </div>
+      <div class="col-12">
+        <div class="form-text">O periodo nao pode passar de 365 dias e a data inicial precisa
+          ser menor ou igual a final (RN13).</div>
+      </div>
+    </form>
+  </div>
+
+  <div class="row g-3 mb-4" th:if="${resumo != null}">
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Atendimentos</div>
+      <div class="display-6" th:text="${resumo.total}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Concluidos</div>
+      <div class="display-6" th:text="${resumo.concluidos}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Comparecimento</div>
+      <div class="display-6"><span th:text="${resumo.taxaComparecimento}">0</span>%</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Faturamento</div>
+      <div class="display-6">R$ <span
+            th:text="${#numbers.formatDecimal(resumo.faturamento,1,2,'COMMA')}">0,00</span></div>
+      <div class="form-text">Soma apenas o que foi concluido.</div></div></div>
+  </div>
+
+  <div class="card p-3 mb-3" th:if="${resumo != null}">
+    <div class="card-title">Cancelamentos e faltas</div>
+    <p class="mb-0">
+      Cancelados: <b th:text="${resumo.cancelados}">0</b> &middot;
+      Faltas: <b th:text="${resumo.faltas}">0</b>
+    </p>
+  </div>
+
+  <div class="card p-3 mb-3" th:if="${porProfissional != null and !#lists.isEmpty(porProfissional)}">
+    <div class="card-title">Por profissional</div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Profissional</th><th>Total</th><th>Concluidos</th><th>Cancelados</th>
+          <th>Faltas</th><th class="text-end">Faturamento</th></tr></thead>
+        <tbody>
+        <tr th:each="l : ${porProfissional}">
+          <td th:text="${l.rotulo}">Profissional</td>
+          <td th:text="${l.total}">0</td>
+          <td th:text="${l.concluidos}">0</td>
+          <td th:text="${l.cancelados}">0</td>
+          <td th:text="${l.faltas}">0</td>
+          <td class="text-end">R$ <span
+                th:text="${#numbers.formatDecimal(l.faturamento,1,2,'COMMA')}">0,00</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card p-3" th:if="${porServico != null and !#lists.isEmpty(porServico)}">
+    <div class="card-title">Por servico</div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Servico</th><th>Total</th><th>Concluidos</th><th>Cancelados</th>
+          <th>Faltas</th><th class="text-end">Faturamento</th></tr></thead>
+        <tbody>
+        <tr th:each="l : ${porServico}">
+          <td th:text="${l.rotulo}">Servico</td>
+          <td th:text="${l.total}">0</td>
+          <td th:text="${l.concluidos}">0</td>
+          <td th:text="${l.cancelados}">0</td>
+          <td th:text="${l.faltas}">0</td>
+          <td class="text-end">R$ <span
+                th:text="${#numbers.formatDecimal(l.faturamento,1,2,'COMMA')}">0,00</span></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="vazio" th:if="${resumo != null and resumo.total == 0}">
+    <p>Nenhum atendimento no periodo informado.</p>
+  </div>
+
+  <footer th:replace="~{fragmentos/layout :: rodape}"></footer>
+</div>
+</body>
+</html>

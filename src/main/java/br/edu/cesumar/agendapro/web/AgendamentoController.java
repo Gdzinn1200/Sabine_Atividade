@@ -1,8 +1,10 @@
 package br.edu.cesumar.agendapro.web;
 
 import br.edu.cesumar.agendapro.dominio.Agendamento;
+import br.edu.cesumar.agendapro.dominio.Cliente;
 import br.edu.cesumar.agendapro.dominio.Profissional;
 import br.edu.cesumar.agendapro.dominio.Servico;
+import br.edu.cesumar.agendapro.dominio.regras.Perfil;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasAgenda;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasSituacao;
 import br.edu.cesumar.agendapro.dominio.regras.SituacaoAgendamento;
@@ -10,7 +12,9 @@ import br.edu.cesumar.agendapro.dominio.regras.ValidacaoException;
 import br.edu.cesumar.agendapro.repositorio.ClienteRepository;
 import br.edu.cesumar.agendapro.repositorio.ServicoRepository;
 import br.edu.cesumar.agendapro.servico.AgendamentoService;
+import br.edu.cesumar.agendapro.servico.NotificacaoService;
 import br.edu.cesumar.agendapro.servico.ProfissionalService;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -23,7 +27,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-/** Telas do fluxo de agendamento: agenda do dia, novo agendamento e detalhe (RF07 a RF12). */
+/**
+ * Fluxo do agendamento (RF07 a RF13).
+ *
+ * RNF02: alem do filtro de acesso por area, cada consulta e limitada ao que o
+ * perfil pode ver. O profissional ve a propria agenda; o cliente ve apenas os
+ * proprios atendimentos.
+ */
 @Controller
 public class AgendamentoController {
 
@@ -31,15 +41,18 @@ public class AgendamentoController {
     private final ProfissionalService profissionais;
     private final ServicoRepository servicos;
     private final ClienteRepository clientes;
+    private final NotificacaoService notificacoes;
 
     public AgendamentoController(AgendamentoService agendamentos,
                                  ProfissionalService profissionais,
                                  ServicoRepository servicos,
-                                 ClienteRepository clientes) {
+                                 ClienteRepository clientes,
+                                 NotificacaoService notificacoes) {
         this.agendamentos = agendamentos;
         this.profissionais = profissionais;
         this.servicos = servicos;
         this.clientes = clientes;
+        this.notificacoes = notificacoes;
     }
 
     // ------------------------------------------------------------ RF12
@@ -48,16 +61,27 @@ public class AgendamentoController {
                          @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
                          @RequestParam(required = false) Long profissional,
                          @RequestParam(required = false) SituacaoAgendamento situacao,
-                         Model model) {
+                         Model model,
+                         HttpServletRequest request) {
+
+        UsuarioSessao usuario = SessaoAtual.de(request);
         LocalDate dia = data == null ? LocalDate.now() : data;
+
+        // RNF02: o profissional so enxerga a propria agenda.
+        Long filtroProfissional = profissional;
+        if (usuario != null && usuario.isProfissional()) {
+            filtroProfissional = usuario.idProfissional();
+        }
+
         model.addAttribute("data", dia);
         model.addAttribute("dataFormatada",
                 dia.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-        model.addAttribute("profissional", profissional);
+        model.addAttribute("profissional", filtroProfissional);
+        model.addAttribute("travarProfissional", usuario != null && usuario.isProfissional());
         model.addAttribute("situacao", situacao);
         model.addAttribute("profissionais", profissionais.listarAtivos());
         model.addAttribute("situacoes", SituacaoAgendamento.values());
-        model.addAttribute("agendamentos", agendamentos.agendaDoDia(dia, profissional, situacao));
+        model.addAttribute("agendamentos", agendamentos.agendaDoDia(dia, filtroProfissional, situacao));
         return "agenda/index";
     }
 
@@ -68,8 +92,17 @@ public class AgendamentoController {
                        @RequestParam(required = false) Long profissional,
                        @RequestParam(required = false)
                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-                       Model model) {
+                       Model model,
+                       HttpServletRequest request) {
+
+        UsuarioSessao usuario = SessaoAtual.de(request);
         LocalDate dia = data == null ? LocalDate.now().plusDays(1) : data;
+
+        // RNF02: o cliente so agenda para si mesmo.
+        Long idCliente = cliente;
+        if (usuario != null && usuario.isCliente()) {
+            idCliente = usuario.idCliente();
+        }
 
         List<Servico> ativos = servicos.findByAtivoTrueOrderByNome();
         Long idServico = servico;
@@ -77,10 +110,13 @@ public class AgendamentoController {
             idServico = ativos.get(0).getId();
         }
 
-        List<Profissional> habilitados = idServico == null
-                ? List.of() : profissionais.habilitadosPara(idServico);
+        final Long servicoEscolhido = idServico;
+        List<Profissional> habilitados = servicoEscolhido == null
+                ? List.of() : profissionais.habilitadosPara(servicoEscolhido);
+
         Long idProfissional = profissional;
-        if ((idProfissional == null || habilitados.stream().noneMatch(p -> p.getId().equals(profissional)))
+        if ((idProfissional == null
+                || habilitados.stream().noneMatch(p -> p.getId().equals(profissional)))
                 && !habilitados.isEmpty()) {
             idProfissional = habilitados.get(0).getId();
         }
@@ -88,49 +124,68 @@ public class AgendamentoController {
         model.addAttribute("clientes", clientes.findByAtivoTrueOrderByNome());
         model.addAttribute("servicos", ativos);
         model.addAttribute("habilitados", habilitados);
-        model.addAttribute("idCliente", cliente);
+        model.addAttribute("idCliente", idCliente);
         model.addAttribute("idServico", idServico);
         model.addAttribute("idProfissional", idProfissional);
         model.addAttribute("data", dia);
+        model.addAttribute("travarCliente", usuario != null && usuario.isCliente());
 
+        if (idCliente != null) {
+            clientes.findById(idCliente).ifPresent(c -> model.addAttribute("clienteEscolhido", c));
+        }
         if (idServico != null && idProfissional != null) {
             List<RegrasAgenda.Horario> horarios =
                     agendamentos.horariosDisponiveis(idProfissional, idServico, dia, null);
             model.addAttribute("horarios", horarios);
             model.addAttribute("livres", RegrasAgenda.quantidadeLivre(horarios));
-            model.addAttribute("servicoEscolhido", servicos.findById(idServico).orElse(null));
         }
         return "agendamentos/novo";
     }
 
     @PostMapping("/agendamentos")
-    public String agendar(@RequestParam Long cliente,
+    public String agendar(@RequestParam(required = false) Long cliente,
                           @RequestParam Long servico,
                           @RequestParam Long profissional,
                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
                           @RequestParam @DateTimeFormat(pattern = "HH:mm") LocalTime hora,
                           @RequestParam(defaultValue = "") String observacao,
-                          RedirectAttributes redirect) {
+                          RedirectAttributes redirect,
+                          HttpServletRequest request) {
+
+        UsuarioSessao usuario = SessaoAtual.de(request);
+        Long idCliente = usuario != null && usuario.isCliente() ? usuario.idCliente() : cliente;
+
+        if (idCliente == null) {
+            redirect.addFlashAttribute("erro", "Selecione o cliente do atendimento.");
+            return "redirect:/agendamentos/novo?servico=" + servico
+                    + "&profissional=" + profissional + "&data=" + data;
+        }
         try {
-            Agendamento salvo = agendamentos.agendar(cliente, profissional, servico, data, hora, observacao);
+            Agendamento salvo = agendamentos.agendar(idCliente, profissional, servico, data, hora, observacao);
             redirect.addFlashAttribute("sucesso",
                     "Agendamento gravado para " + salvo.getCliente().getNome() + " em "
-                            + salvo.getDataHoraInicio() + ".");
+                            + salvo.getDataFormatada() + " as " + salvo.getHoraInicioFormatada()
+                            + ". Confirmacao registrada para o cliente.");
             return "redirect:/agendamentos/" + salvo.getId();
         } catch (ValidacaoException e) {
             redirect.addFlashAttribute("erro", Mensagens.resumo(e));
-            return "redirect:/agendamentos/novo?cliente=" + cliente + "&servico=" + servico
+            return "redirect:/agendamentos/novo?cliente=" + idCliente + "&servico=" + servico
                     + "&profissional=" + profissional + "&data=" + data;
         }
     }
 
     // ------------------------------------------------------------ RF09 a RF11
     @GetMapping("/agendamentos/{id}")
-    public String detalhe(@PathVariable Long id, Model model) {
+    public String detalhe(@PathVariable Long id, Model model, HttpServletRequest request) {
         Agendamento agendamento = agendamentos.porId(id);
+        if (!podeVer(agendamento, SessaoAtual.de(request))) {
+            return "redirect:/sem-acesso";
+        }
         model.addAttribute("agendamento", agendamento);
         model.addAttribute("historico", agendamentos.historicoDe(id));
+        model.addAttribute("avisos", notificacoes.doAgendamento(id));
         model.addAttribute("proximas", RegrasSituacao.proximas(agendamento.getSituacao()));
+        model.addAttribute("antecedencia", RegrasSituacao.HORAS_ANTECEDENCIA);
         return "agendamentos/detalhe";
     }
 
@@ -138,7 +193,12 @@ public class AgendamentoController {
     public String mudarSituacao(@PathVariable Long id,
                                 @RequestParam SituacaoAgendamento nova,
                                 @RequestParam(defaultValue = "") String motivo,
-                                RedirectAttributes redirect) {
+                                RedirectAttributes redirect,
+                                HttpServletRequest request) {
+        UsuarioSessao usuario = SessaoAtual.de(request);
+        if (usuario != null && usuario.isCliente()) {
+            return "redirect:/sem-acesso";   // RNF02: o cliente nao conduz o atendimento
+        }
         try {
             agendamentos.mudarSituacao(id, nova, motivo);
             redirect.addFlashAttribute("sucesso", "Situacao atualizada para " + nova.getRotulo() + ".");
@@ -151,12 +211,19 @@ public class AgendamentoController {
     @PostMapping("/agendamentos/{id}/cancelar")
     public String cancelar(@PathVariable Long id,
                            @RequestParam(defaultValue = "") String motivo,
-                           @RequestParam(defaultValue = "ADMINISTRADOR") RegrasSituacao.Perfil solicitante,
-                           RedirectAttributes redirect) {
+                           RedirectAttributes redirect,
+                           HttpServletRequest request) {
+        UsuarioSessao usuario = SessaoAtual.de(request);
+        Agendamento agendamento = agendamentos.porId(id);
+        if (!podeVer(agendamento, usuario)) {
+            return "redirect:/sem-acesso";
+        }
+        // RN05: quem solicita vem da sessao, nao de um campo do formulario.
+        Perfil solicitante = usuario == null ? Perfil.ADMINISTRADOR : usuario.perfil();
         try {
             agendamentos.cancelar(id, motivo, solicitante);
             redirect.addFlashAttribute("sucesso",
-                    "Agendamento cancelado. O horario voltou a ficar disponivel.");
+                    "Agendamento cancelado. O horario voltou a ficar disponivel e o cliente foi avisado.");
         } catch (ValidacaoException e) {
             redirect.addFlashAttribute("erro", Mensagens.resumo(e));
         }
@@ -167,10 +234,13 @@ public class AgendamentoController {
     public String telaRemarcar(@PathVariable Long id,
                                @RequestParam(required = false)
                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
-                               Model model) {
+                               Model model,
+                               HttpServletRequest request) {
         Agendamento agendamento = agendamentos.porId(id);
+        if (!podeVer(agendamento, SessaoAtual.de(request))) {
+            return "redirect:/sem-acesso";
+        }
         LocalDate dia = data == null ? agendamento.getDataHoraInicio().toLocalDate() : data;
-
         List<RegrasAgenda.Horario> horarios = agendamentos.horariosDisponiveis(
                 agendamento.getProfissional().getId(), agendamento.getServico().getId(), dia, id);
 
@@ -185,11 +255,15 @@ public class AgendamentoController {
     public String remarcar(@PathVariable Long id,
                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data,
                            @RequestParam @DateTimeFormat(pattern = "HH:mm") LocalTime hora,
-                           RedirectAttributes redirect) {
+                           RedirectAttributes redirect,
+                           HttpServletRequest request) {
         Agendamento agendamento = agendamentos.porId(id);
+        if (!podeVer(agendamento, SessaoAtual.de(request))) {
+            return "redirect:/sem-acesso";
+        }
         try {
             agendamentos.remarcar(id, agendamento.getProfissional().getId(), data, hora);
-            redirect.addFlashAttribute("sucesso", "Agendamento remarcado para " + data + " as " + hora + ".");
+            redirect.addFlashAttribute("sucesso", "Agendamento remarcado. O cliente foi avisado.");
             return "redirect:/agendamentos/" + id;
         } catch (ValidacaoException e) {
             redirect.addFlashAttribute("erro", Mensagens.resumo(e));
@@ -199,9 +273,45 @@ public class AgendamentoController {
 
     // ------------------------------------------------------------ RF13
     @GetMapping("/clientes/{id}/historico")
-    public String historicoDoCliente(@PathVariable Long id, Model model) {
-        model.addAttribute("cliente", clientes.findById(id).orElseThrow());
-        model.addAttribute("agendamentos", agendamentos.historicoDoCliente(id));
+    public String historicoDoCliente(@PathVariable Long id, Model model, HttpServletRequest request) {
+        UsuarioSessao usuario = SessaoAtual.de(request);
+        if (usuario != null && usuario.isCliente() && !id.equals(usuario.idCliente())) {
+            return "redirect:/sem-acesso";
+        }
+        return montarHistorico(id, model);
+    }
+
+    /** Atalho do proprio cliente para o seu historico. */
+    @GetMapping("/meu-historico")
+    public String meuHistorico(Model model, HttpServletRequest request) {
+        UsuarioSessao usuario = SessaoAtual.de(request);
+        if (usuario == null || usuario.idCliente() == null) {
+            return "redirect:/sem-acesso";
+        }
+        return montarHistorico(usuario.idCliente(), model);
+    }
+
+    private String montarHistorico(Long idCliente, Model model) {
+        Cliente cliente = clientes.findById(idCliente)
+                .orElseThrow(() -> new IllegalArgumentException("Cliente nao encontrado: " + idCliente));
+        model.addAttribute("cliente", cliente);
+        model.addAttribute("agendamentos", agendamentos.historicoDoCliente(idCliente));
         return "clientes/historico";
+    }
+
+    /** RNF02: o cliente so abre os proprios atendimentos; o profissional, os seus. */
+    private boolean podeVer(Agendamento agendamento, UsuarioSessao usuario) {
+        if (usuario == null || usuario.isAdministrador()) {
+            return true;
+        }
+        if (usuario.isCliente()) {
+            return agendamento.getCliente() != null
+                    && agendamento.getCliente().getId().equals(usuario.idCliente());
+        }
+        if (usuario.isProfissional()) {
+            return agendamento.getProfissional() != null
+                    && agendamento.getProfissional().getId().equals(usuario.idProfissional());
+        }
+        return false;
     }
 }

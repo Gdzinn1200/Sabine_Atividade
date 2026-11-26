@@ -55,7 +55,7 @@ class RegrasSituacaoTest {
     @DisplayName("CT30 - RN05: cliente nao cancela com menos de 4 horas")
     void ct30() {
         var erros = RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO,
-                agora.plusHours(2), agora, RegrasSituacao.Perfil.CLIENTE, "Solicitacao do cliente");
+                agora.plusHours(2), agora, Perfil.CLIENTE, "Solicitacao do cliente");
         assertTrue(temRegra(erros, "RN05"));
     }
 
@@ -63,7 +63,7 @@ class RegrasSituacaoTest {
     @DisplayName("CT31 - RN05: cliente cancela com mais de 4 horas")
     void ct31() {
         var erros = RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO,
-                agora.plusHours(6), agora, RegrasSituacao.Perfil.CLIENTE, "Solicitacao do cliente");
+                agora.plusHours(6), agora, Perfil.CLIENTE, "Solicitacao do cliente");
         assertTrue(erros.isEmpty(), () -> "nao deveria haver erros: " + erros);
     }
 
@@ -71,7 +71,7 @@ class RegrasSituacaoTest {
     @DisplayName("CT32 - RN05: o estabelecimento cancela a qualquer momento")
     void ct32() {
         var erros = RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO,
-                agora.plusHours(2), agora, RegrasSituacao.Perfil.ADMINISTRADOR,
+                agora.plusHours(2), agora, Perfil.ADMINISTRADOR,
                 "Indisponibilidade do profissional");
         assertTrue(erros.isEmpty(), () -> "nao deveria haver erros: " + erros);
     }
@@ -80,7 +80,7 @@ class RegrasSituacaoTest {
     @DisplayName("CT33 - RF10: o motivo do cancelamento e obrigatorio")
     void ct33() {
         var erros = RegrasSituacao.validarCancelamento(SituacaoAgendamento.AGENDADO,
-                agora.plusHours(6), agora, RegrasSituacao.Perfil.ADMINISTRADOR, "  ");
+                agora.plusHours(6), agora, Perfil.ADMINISTRADOR, "  ");
         assertTrue(temCampo(erros, "motivo"));
     }
 }

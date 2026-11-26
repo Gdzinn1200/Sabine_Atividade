@@ -23,6 +23,10 @@ public class Profissional {
     @Column(name = "id_profissional")
     private Long id;
 
+    /** Conta de acesso vinculada ao profissional (RNF02). */
+    @Column(name = "id_usuario")
+    private Long idUsuario;
+
     @Column(name = "nome", nullable = false, length = 120)
     private String nome;
 
@@ -60,6 +64,14 @@ public class Profissional {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getNome() {

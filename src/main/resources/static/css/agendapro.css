@@ -35,3 +35,20 @@ table thead th{background:#EEF2F9;color:var(--azul-escuro);font-size:.85rem}
 .slot.off{background:#F0F1F3;color:#A0A6B0;text-decoration:line-through;cursor:not-allowed}
 .slot.off:hover{background:#F0F1F3;color:#A0A6B0;border-color:#C9D2E0}
 footer{color:var(--texto2);font-size:.85rem}
+
+/* ---- entrega de 27/11: acesso por perfil, telas de login e relatorios ---- */
+.navbar-agendapro .identificacao{display:flex;align-items:center;gap:.5rem}
+.navbar-agendapro .quem{color:#fff;font-weight:600;font-size:.9rem}
+.navbar-agendapro .papel{color:#8FB8E8;font-size:.78rem;text-transform:uppercase;
+      letter-spacing:.04em;border:1px solid #42618F;border-radius:999px;padding:.1rem .5rem}
+body.tela-acesso{display:flex;align-items:center;min-height:100vh}
+body.tela-acesso .container{max-width:460px}
+.caixa-acesso{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:2rem}
+.caixa-acesso .marca{font-size:1.6rem;font-weight:700;color:var(--azul-escuro)}
+.caixa-acesso .marca span{color:var(--azul)}
+.aviso-demo{margin-top:1rem;font-size:.82rem;color:var(--texto2);text-align:center}
+.tipo-CONFIRMACAO{background:var(--verde)}
+.tipo-LEMBRETE{background:var(--azul)}
+.tipo-REMARCACAO{background:var(--ambar)}
+.tipo-CANCELAMENTO{background:var(--vermelho)}
+.tipo-RECUPERACAO_SENHA{background:var(--azul-escuro)}

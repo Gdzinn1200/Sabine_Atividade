@@ -5,8 +5,8 @@
 -- As datas sao calculadas a partir de CURDATE(), entao a agenda do dia
 -- sempre aparece preenchida, qualquer que seja o dia da demonstracao.
 --
--- As senhas gravadas aqui sao apenas exemplos. Na aplicacao o hash e
--- gerado pelo Spring Security, previsto para a entrega de 27/11 (RNF01).
+-- As senhas das contas de demonstracao sao todas 123456, gravadas como hash
+-- PBKDF2-HMAC-SHA256 com sal por conta, gerado pela classe Senha (RNF01).
 -- =====================================================================
 
 USE agendapro;
@@ -22,15 +22,24 @@ TRUNCATE TABLE profissional_servico;
 TRUNCATE TABLE servico;
 TRUNCATE TABLE profissional;
 TRUNCATE TABLE cliente;
+TRUNCATE TABLE recuperacao_senha;
 TRUNCATE TABLE usuario;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- ------------------------------------------------------------- usuarios
+-- Hashes reais gerados pela classe Senha (PBKDF2-HMAC-SHA256, 120.000 iteracoes,
+-- sal de 16 bytes por conta). A senha das quatro contas de demonstracao e 123456.
+-- O formato gravado e pbkdf2$<iteracoes>$<sal em base64>$<hash em base64>: nao existe
+-- caminho de volta do hash para a senha (RNF01).
 INSERT INTO usuario (id_usuario, nome, email, senha_hash, perfil) VALUES
-  (1, 'Gabriel V. Hartmann', 'admin@agendapro.com', '$2a$10$exemploHashAdministrador', 'ADMINISTRADOR'),
-  (2, 'Ana Paula Ribeiro',   'ana@agendapro.com',   '$2a$10$exemploHashProfissional1', 'PROFISSIONAL'),
-  (3, 'Jonas Ferreira',      'jonas@agendapro.com', '$2a$10$exemploHashProfissional2', 'PROFISSIONAL'),
-  (4, 'Marina Souza',        'marina@email.com',    '$2a$10$exemploHashCliente1',      'CLIENTE');
+  (1, 'Gabriel V. Hartmann', 'admin@agendapro.com',
+      'pbkdf2$120000$OokD4zqJyvS1LqELP28KmQ==$6YvNFGnOVLGbMpgWbwuTzW7j2AmOVElF8a9y0MvyfdY=', 'ADMINISTRADOR'),
+  (2, 'Ana Paula Ribeiro',   'ana@agendapro.com',
+      'pbkdf2$120000$S4/8bxiNKaHuJxt7oI829w==$S4Vx87+lxQXWkXkZpYHi5Unlk4PHTuddwZ1+fhCD4qQ=', 'PROFISSIONAL'),
+  (3, 'Jonas Ferreira',      'jonas@agendapro.com',
+      'pbkdf2$120000$xkPElzKSILZc5UWMS51LHw==$f7zb+D0dK65kMIUYHEmzsX/scDdIthF3pmsLJU+hIec=', 'PROFISSIONAL'),
+  (4, 'Marina Souza',        'marina@email.com',
+      'pbkdf2$120000$Cz9qPaFYrujUgNxh99Wlzg==$7LmQKoalo3jEe0yrvUB8tgb8ILnNj1i8QfRmvSgHnr0=', 'CLIENTE');
 
 -- ------------------------------------------------------------- clientes
 INSERT INTO cliente (id_cliente, id_usuario, nome, telefone, email, data_nascimento, ativo, bloqueado) VALUES
@@ -114,10 +123,22 @@ INSERT INTO historico_situacao (id_agendamento, id_usuario, situacao_anterior, s
   (7, 1, 'AGENDADO',   'CANCELADO',      NOW(), 'Solicitacao do cliente'),
   (8, 1, 'CONFIRMADO', 'NAO_COMPARECEU', NOW(), 'Cliente nao compareceu');
 
+-- --------------------------------------------- notificacoes enviadas
+-- Registro das mensagens que o sistema ja disparou (RF14, RF15 e RN11).
+INSERT INTO notificacao (id_agendamento, tipo, destinatario, assunto,
+                         data_hora_envio, enviada) VALUES
+  (1, 'CONFIRMACAO',   'marina@email.com',   'Seu atendimento foi agendado',   NOW(), TRUE),
+  (1, 'LEMBRETE',      'marina@email.com',   'Lembrete do seu atendimento',    NOW(), TRUE),
+  (2, 'CONFIRMACAO',   'rafael@email.com',   'Seu atendimento foi agendado',   NOW(), TRUE),
+  (3, 'CONFIRMACAO',   'camila@email.com',   'Seu atendimento foi agendado',   NOW(), TRUE),
+  (7, 'CANCELAMENTO',  'patricia@email.com', 'Seu atendimento foi cancelado',  NOW(), TRUE);
+
 -- ------------------------------------------------------------ conferencia
 SELECT 'clientes' AS tabela, COUNT(*) AS registros FROM cliente
 UNION ALL SELECT 'servicos', COUNT(*) FROM servico
 UNION ALL SELECT 'profissionais', COUNT(*) FROM profissional
 UNION ALL SELECT 'horarios', COUNT(*) FROM horario_atendimento
 UNION ALL SELECT 'bloqueios', COUNT(*) FROM bloqueio_agenda
-UNION ALL SELECT 'agendamentos', COUNT(*) FROM agendamento;
+UNION ALL SELECT 'agendamentos', COUNT(*) FROM agendamento
+UNION ALL SELECT 'usuarios', COUNT(*) FROM usuario
+UNION ALL SELECT 'notificacoes', COUNT(*) FROM notificacao;

@@ -9,6 +9,8 @@ public interface ClienteRepository extends JpaRepository<Cliente, Long> {
 
     List<Cliente> findByAtivoTrueOrderByNome();
 
+    java.util.Optional<Cliente> findByIdUsuario(Long idUsuario);
+
     List<Cliente> findByAtivoFalseOrderByNome();
 
     @Query("select c from Cliente c "

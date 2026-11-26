@@ -6,8 +6,10 @@ import br.edu.cesumar.agendapro.dominio.HistoricoSituacao;
 import br.edu.cesumar.agendapro.dominio.Profissional;
 import br.edu.cesumar.agendapro.dominio.Servico;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasAgenda;
+import br.edu.cesumar.agendapro.dominio.regras.Perfil;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasSituacao;
 import br.edu.cesumar.agendapro.dominio.regras.SituacaoAgendamento;
+import br.edu.cesumar.agendapro.dominio.regras.TipoNotificacao;
 import br.edu.cesumar.agendapro.repositorio.AgendamentoRepository;
 import br.edu.cesumar.agendapro.repositorio.ClienteRepository;
 import br.edu.cesumar.agendapro.repositorio.HistoricoSituacaoRepository;
@@ -33,6 +35,7 @@ public class AgendamentoService {
     private final ProfissionalService profissionais;
     private final ServicoService servicos;
     private final AgendaService agenda;
+    private final NotificacaoService notificacoes;
 
     public AgendamentoService(AgendamentoRepository repositorio,
                               HistoricoSituacaoRepository historico,
@@ -40,7 +43,8 @@ public class AgendamentoService {
                               ClienteService clienteService,
                               ProfissionalService profissionais,
                               ServicoService servicos,
-                              AgendaService agenda) {
+                              AgendaService agenda,
+                              NotificacaoService notificacoes) {
         this.repositorio = repositorio;
         this.historico = historico;
         this.clientes = clientes;
@@ -48,6 +52,7 @@ public class AgendamentoService {
         this.profissionais = profissionais;
         this.servicos = servicos;
         this.agenda = agenda;
+        this.notificacoes = notificacoes;
     }
 
     public Agendamento porId(Long id) {
@@ -111,6 +116,7 @@ public class AgendamentoService {
 
         Agendamento salvo = repositorio.save(agendamento);
         registrar(salvo, null, SituacaoAgendamento.AGENDADO, "Agendamento criado");
+        notificacoes.registrar(salvo, TipoNotificacao.CONFIRMACAO);   // RF14
         return salvo;
     }
 
@@ -120,7 +126,7 @@ public class AgendamentoService {
         Agendamento agendamento = porId(idAgendamento);
         RegrasSituacao.validarCancelamentoOuFalhar(agendamento.getSituacao(),
                 agendamento.getDataHoraInicio(), LocalDateTime.now(),
-                RegrasSituacao.Perfil.ADMINISTRADOR, "remarcacao");
+                Perfil.ADMINISTRADOR, "remarcacao");
 
         Profissional profissional = profissionais.porId(idProfissional);
         Servico servico = agendamento.getServico();
@@ -142,6 +148,7 @@ public class AgendamentoService {
         Agendamento salvo = repositorio.save(agendamento);
         registrar(salvo, salvo.getSituacao(), salvo.getSituacao(),
                 "Remarcado de " + anterior + " para " + salvo.getDataHoraInicio());
+        notificacoes.registrar(salvo, TipoNotificacao.CONFIRMACAO);   // RF14
         return salvo;
     }
 
@@ -164,7 +171,7 @@ public class AgendamentoService {
 
     /** RF10 com RN05 e RN09: cancela o atendimento e libera o horario. */
     @Transactional
-    public Agendamento cancelar(Long idAgendamento, String motivo, RegrasSituacao.Perfil solicitante) {
+    public Agendamento cancelar(Long idAgendamento, String motivo, Perfil solicitante) {
         Agendamento agendamento = porId(idAgendamento);
         RegrasSituacao.validarCancelamentoOuFalhar(agendamento.getSituacao(),
                 agendamento.getDataHoraInicio(), LocalDateTime.now(), solicitante, motivo);
@@ -173,6 +180,7 @@ public class AgendamentoService {
         agendamento.setSituacao(SituacaoAgendamento.CANCELADO);
         Agendamento salvo = repositorio.save(agendamento);
         registrar(salvo, anterior, SituacaoAgendamento.CANCELADO, motivo);
+        notificacoes.registrar(salvo, TipoNotificacao.CANCELAMENTO);  // RF14
         return salvo;
     }
 

@@ -1,8 +1,14 @@
 import br.edu.cesumar.agendapro.dominio.regras.ErroValidacao;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasAgenda;
+import br.edu.cesumar.agendapro.dominio.regras.RegrasAcesso;
+import br.edu.cesumar.agendapro.dominio.regras.RegrasNotificacao;
+import br.edu.cesumar.agendapro.dominio.regras.RegrasRelatorio;
+import br.edu.cesumar.agendapro.dominio.regras.Senha;
+import br.edu.cesumar.agendapro.dominio.regras.TipoNotificacao;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasCliente;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasProfissional;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasServico;
+import br.edu.cesumar.agendapro.dominio.regras.Perfil;
 import br.edu.cesumar.agendapro.dominio.regras.RegrasSituacao;
 import br.edu.cesumar.agendapro.dominio.regras.SituacaoAgendamento;
 import java.math.BigDecimal;
@@ -40,6 +46,10 @@ public class TesteRegras {
         cadastros();
         agenda();
         situacao();
+        acesso();
+        senhas();
+        notificacoes();
+        relatorios();
 
         System.out.println("-------------------------------------------------------------------------------");
         System.out.printf("Total: %d caso(s) | Aprovados: %d | Reprovados: %d%n",
@@ -244,19 +254,19 @@ public class TesteRegras {
 
         verificar("CT30", "RN05", "Recusar cancelamento do cliente com menos de 4 horas",
                 temRegra(RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO,
-                        daquiDuasHoras, agora, RegrasSituacao.Perfil.CLIENTE, "Solicitacao do cliente"), "RN05"));
+                        daquiDuasHoras, agora, Perfil.CLIENTE, "Solicitacao do cliente"), "RN05"));
 
         verificar("CT31", "RN05", "Permitir cancelamento do cliente com mais de 4 horas",
                 RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO, daquiSeisHoras, agora,
-                        RegrasSituacao.Perfil.CLIENTE, "Solicitacao do cliente").isEmpty());
+                        Perfil.CLIENTE, "Solicitacao do cliente").isEmpty());
 
         verificar("CT32", "RN05", "Permitir cancelamento pelo estabelecimento a qualquer momento",
                 RegrasSituacao.validarCancelamento(SituacaoAgendamento.CONFIRMADO, daquiDuasHoras, agora,
-                        RegrasSituacao.Perfil.ADMINISTRADOR, "Indisponibilidade do profissional").isEmpty());
+                        Perfil.ADMINISTRADOR, "Indisponibilidade do profissional").isEmpty());
 
         verificar("CT33", "RF10 / RNF05", "Exigir o motivo do cancelamento",
                 temCampo(RegrasSituacao.validarCancelamento(SituacaoAgendamento.AGENDADO, daquiSeisHoras,
-                        agora, RegrasSituacao.Perfil.ADMINISTRADOR, "  "), "motivo"));
+                        agora, Perfil.ADMINISTRADOR, "  "), "motivo"));
     }
 
     // =================================================================
@@ -270,6 +280,157 @@ public class TesteRegras {
     private static RegrasAgenda.Compromisso falta(Long id, LocalDate dia) {
         return new RegrasAgenda.Compromisso(id, PROF, CLIENTE, dia, LocalTime.of(9, 0), LocalTime.of(9, 40),
                 SituacaoAgendamento.NAO_COMPARECEU);
+    }
+
+    // =================================================================
+    // Acesso por perfil, senha, notificacoes e relatorios (entrega de 27/11)
+    // =================================================================
+    private static void acesso() {
+        verificar("CT34", "RNF02", "Administrador abre os relatorios",
+                RegrasAcesso.permitido(Perfil.ADMINISTRADOR, "/relatorios"));
+
+        verificar("CT35", "RNF02 / RN13", "Cliente nao abre os relatorios",
+                !RegrasAcesso.permitido(Perfil.CLIENTE, "/relatorios"));
+
+        verificar("CT36", "RNF02", "Profissional abre a agenda",
+                RegrasAcesso.permitido(Perfil.PROFISSIONAL, "/agenda"));
+
+        verificar("CT37", "RNF02", "Profissional nao abre o cadastro de usuarios",
+                !RegrasAcesso.permitido(Perfil.PROFISSIONAL, "/usuarios"));
+
+        verificar("CT38", "RNF02", "Cliente marca o proprio atendimento",
+                RegrasAcesso.permitido(Perfil.CLIENTE, "/agendamentos/novo"));
+
+        verificar("CT39", "RNF02", "Visitante so acessa as telas publicas",
+                RegrasAcesso.permitido(null, "/login")
+                        && !RegrasAcesso.permitido(null, "/"));
+
+        boolean menuFechado = RegrasAcesso.menuDe(Perfil.CLIENTE).stream()
+                .allMatch(a -> RegrasAcesso.permitido(Perfil.CLIENTE, a.caminho()));
+        verificar("CT40", "RNF02", "Menu do cliente so mostra o que ele pode abrir", menuFechado);
+
+        boolean matrizFecha = RegrasAcesso.matriz().stream().anyMatch(
+                l -> "Relatorios".equals(l.rotulo()) && l.administrador() && !l.cliente());
+        verificar("CT41", "RNF02", "Quadro de permissoes acompanha o filtro", matrizFecha);
+    }
+
+    private static void senhas() {
+        String registro = Senha.cifrar("minhaSenha123");
+
+        verificar("CT42", "RNF01", "Senha e gravada apenas como hash com sal",
+                Senha.registroCifrado(registro) && !registro.contains("minhaSenha123"));
+
+        verificar("CT43", "RNF01", "Senha correta e aceita",
+                Senha.confere("minhaSenha123", registro));
+
+        verificar("CT44", "RNF01", "Senha errada e recusada",
+                !Senha.confere("minhasenha123", registro));
+
+        verificar("CT45", "RNF01", "Sal diferente a cada cadastro",
+                !Senha.cifrar("minhaSenha123").equals(registro));
+
+        verificar("CT46", "RNF01", "Senha curta e recusada",
+                !Senha.validar("123", "123").isEmpty());
+
+        verificar("CT47", "RNF01", "Confirmacao diferente e recusada",
+                !Senha.validar("123456", "654321").isEmpty());
+
+        verificar("CT48", "RF18", "Token de recuperacao nao se repete",
+                !Senha.tokenAleatorio().equals(Senha.tokenAleatorio()));
+    }
+
+    private static void notificacoes() {
+        LocalDateTime agora = LocalDateTime.of(2026, 11, 27, 8, 0);
+
+        RegrasNotificacao.Candidato amanha = new RegrasNotificacao.Candidato(
+                1L, agora.plusHours(20), SituacaoAgendamento.CONFIRMADO, false);
+        RegrasNotificacao.Candidato jaAvisado = new RegrasNotificacao.Candidato(
+                2L, agora.plusHours(20), SituacaoAgendamento.CONFIRMADO, true);
+        RegrasNotificacao.Candidato distante = new RegrasNotificacao.Candidato(
+                3L, agora.plusDays(5), SituacaoAgendamento.AGENDADO, false);
+        RegrasNotificacao.Candidato cancelado = new RegrasNotificacao.Candidato(
+                4L, agora.plusHours(20), SituacaoAgendamento.CANCELADO, false);
+        RegrasNotificacao.Candidato passado = new RegrasNotificacao.Candidato(
+                5L, agora.minusHours(2), SituacaoAgendamento.CONFIRMADO, false);
+
+        verificar("CT49", "RN11", "Lembrete sai nas 24 horas anteriores",
+                RegrasNotificacao.deveEnviarLembrete(amanha, agora));
+
+        verificar("CT50", "RN11", "Lembrete nao se repete no mesmo atendimento",
+                !RegrasNotificacao.deveEnviarLembrete(jaAvisado, agora));
+
+        verificar("CT51", "RN11", "Atendimento distante ainda nao gera lembrete",
+                !RegrasNotificacao.deveEnviarLembrete(distante, agora));
+
+        verificar("CT52", "RN11", "Atendimento cancelado nao gera lembrete",
+                !RegrasNotificacao.deveEnviarLembrete(cancelado, agora));
+
+        verificar("CT53", "RN11", "Atendimento passado nao gera lembrete",
+                !RegrasNotificacao.deveEnviarLembrete(passado, agora));
+
+        List<Long> fila = RegrasNotificacao.lembretesAEnviar(
+                List.of(amanha, jaAvisado, distante, cancelado, passado), agora);
+        verificar("CT54", "RN11", "Rotina separa apenas quem precisa de lembrete",
+                fila.size() == 1 && fila.get(0).equals(1L));
+
+        verificar("CT55", "RF14", "Cancelamento gera aviso de cancelamento",
+                RegrasNotificacao.tipoPara(SituacaoAgendamento.CANCELADO)
+                        == TipoNotificacao.CANCELAMENTO);
+
+        verificar("CT56", "RF14", "Destinatario sem e-mail nao recebe aviso",
+                RegrasNotificacao.podeNotificar("marina@email.com")
+                        && !RegrasNotificacao.podeNotificar(""));
+    }
+
+    private static void relatorios() {
+        LocalDate de = LocalDate.of(2026, 11, 1);
+        LocalDate ate = LocalDate.of(2026, 11, 30);
+
+        List<RegrasRelatorio.Atendimento> dados = List.of(
+                new RegrasRelatorio.Atendimento(LocalDate.of(2026, 11, 3), "Bruno", "Corte",
+                        SituacaoAgendamento.CONCLUIDO, new BigDecimal("45.00")),
+                new RegrasRelatorio.Atendimento(LocalDate.of(2026, 11, 4), "Bruno", "Barba",
+                        SituacaoAgendamento.CONCLUIDO, new BigDecimal("30.00")),
+                new RegrasRelatorio.Atendimento(LocalDate.of(2026, 11, 5), "Bruno", "Corte",
+                        SituacaoAgendamento.CANCELADO, new BigDecimal("45.00")),
+                new RegrasRelatorio.Atendimento(LocalDate.of(2026, 11, 6), "Daniela", "Corte",
+                        SituacaoAgendamento.NAO_COMPARECEU, new BigDecimal("45.00")),
+                new RegrasRelatorio.Atendimento(LocalDate.of(2026, 12, 2), "Daniela", "Corte",
+                        SituacaoAgendamento.CONCLUIDO, new BigDecimal("45.00")));
+
+        List<RegrasRelatorio.Atendimento> periodo = RegrasRelatorio.noPeriodo(dados, de, ate);
+        verificar("CT57", "RF16", "Relatorio considera apenas o periodo pedido",
+                periodo.size() == 4);
+
+        RegrasRelatorio.Resumo resumo = RegrasRelatorio.resumir(periodo);
+        verificar("CT58", "RF16", "Faturamento soma somente atendimentos concluidos",
+                resumo.faturamento().compareTo(new BigDecimal("75.00")) == 0);
+
+        verificar("CT59", "RF16", "Resumo separa concluidos, cancelados e faltas",
+                resumo.total() == 4 && resumo.concluidos() == 2
+                        && resumo.cancelados() == 1 && resumo.faltas() == 1);
+
+        verificar("CT60", "RF16", "Taxa de comparecimento desconsidera cancelados",
+                resumo.taxaComparecimento() == 67);
+
+        List<RegrasRelatorio.Linha> porProfissional = RegrasRelatorio.porProfissional(periodo);
+        verificar("CT61", "RF16", "Totais agrupados por profissional",
+                porProfissional.size() == 2
+                        && porProfissional.stream().anyMatch(
+                                l -> "Bruno".equals(l.rotulo()) && l.total() == 3));
+
+        List<RegrasRelatorio.Linha> porServico = RegrasRelatorio.porServico(periodo);
+        verificar("CT62", "RF16", "Totais agrupados por servico",
+                porServico.stream().anyMatch(l -> "Corte".equals(l.rotulo()) && l.total() == 3));
+
+        verificar("CT63", "RN13", "Periodo invertido e recusado",
+                !RegrasRelatorio.validarPeriodo(ate, de).isEmpty());
+
+        verificar("CT64", "RN13", "Periodo acima de 365 dias e recusado",
+                !RegrasRelatorio.validarPeriodo(de, de.plusDays(400)).isEmpty());
+
+        verificar("CT65", "RN13", "Periodo valido e aceito",
+                RegrasRelatorio.validarPeriodo(de, ate).isEmpty());
     }
 
     /** Uma quarta-feira futura, para os casos nao dependerem do dia em que sao executados. */

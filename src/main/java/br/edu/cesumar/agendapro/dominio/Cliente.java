@@ -19,6 +19,10 @@ public class Cliente {
     @Column(name = "id_cliente")
     private Long id;
 
+    /** Conta de acesso vinculada, quando o cliente usa o sistema (RNF02). */
+    @Column(name = "id_usuario")
+    private Long idUsuario;
+
     @Column(name = "nome", nullable = false, length = 120)
     private String nome;
 
@@ -44,6 +48,14 @@ public class Cliente {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(Long idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getNome() {

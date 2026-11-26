@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Usuarios')}"></head>
+<body>
+<nav th:replace="~{fragmentos/layout :: topo}"></nav>
+<div class="container">
+  <div th:replace="~{fragmentos/layout :: recados}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Usuarios e perfis</h1>
+    <span class="text-secondary">RF17 &middot; RNF01 &middot; RNF02</span>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <div class="card-title">Novo usuario</div>
+    <form method="post" th:action="@{/usuarios}" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label" for="nome">Nome <span class="obrigatorio">*</span></label>
+        <input class="form-control" id="nome" name="nome" required maxlength="120">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label" for="email">E-mail <span class="obrigatorio">*</span></label>
+        <input class="form-control" id="email" name="email" type="email" required maxlength="120">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="perfil">Perfil</label>
+        <select class="form-select" id="perfil" name="perfil">
+          <option th:each="p : ${perfis}" th:value="${p.name()}" th:text="${p.rotulo}">Perfil</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="senha">Senha <span class="obrigatorio">*</span></label>
+        <input class="form-control" id="senha" name="senha" type="password" required>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label" for="confirmacao">Repetir</label>
+        <input class="form-control" id="confirmacao" name="confirmacao" type="password" required>
+      </div>
+      <div class="col-12">
+        <div class="form-text mb-2">A senha e gravada apenas como hash PBKDF2 com sal (RNF01);
+          o sistema nao guarda a senha em texto.</div>
+        <button class="btn btn-primary" type="submit">Cadastrar usuario</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card p-3">
+    <div class="card-title">Usuarios cadastrados</div>
+    <div class="table-responsive">
+      <table class="table align-middle">
+        <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th>
+          <th>Situacao</th><th>Ultimo acesso</th><th class="text-end">Acoes</th></tr></thead>
+        <tbody>
+        <tr th:each="u : ${usuarios}">
+          <td th:text="${u.nome}">Nome</td>
+          <td th:text="${u.email}">email</td>
+          <td><span class="badge text-bg-secondary" th:text="${u.perfil.rotulo}">Perfil</span></td>
+          <td><span class="badge" th:classappend="${u.ativo} ? 'badge-ativo' : 'badge-inativo'"
+                    th:text="${u.ativo} ? 'Ativo' : 'Inativo'">Ativo</span></td>
+          <td th:text="${u.ultimoAcessoFormatado}">&mdash;</td>
+          <td class="text-end">
+            <form method="post" th:action="@{/usuarios/{id}/situacao(id=${u.id})}" class="d-inline">
+              <button class="btn btn-sm btn-outline-primary" type="submit"
+                      th:text="${u.ativo} ? 'Desativar' : 'Reativar'">Desativar</button>
+            </form>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card p-3 mt-3">
+    <div class="card-title">O que cada perfil acessa (RNF02)</div>
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead><tr><th>Area</th><th>Administrador</th><th>Profissional</th><th>Cliente</th></tr></thead>
+        <tbody>
+        <tr th:each="linha : ${matriz}">
+          <td th:text="${linha.rotulo}">Area</td>
+          <td th:text="${linha.administrador} ? 'Sim' : 'Nao'">Sim</td>
+          <td th:text="${linha.profissional} ? 'Sim' : 'Nao'">Sim</td>
+          <td th:text="${linha.cliente} ? 'Sim' : 'Nao'">Nao</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer th:replace="~{fragmentos/layout :: rodape}"></footer>
+</div>
+</body>
+</html>

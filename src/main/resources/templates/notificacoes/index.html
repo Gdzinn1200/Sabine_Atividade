@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Notificacoes')}"></head>
+<body>
+<nav th:replace="~{fragmentos/layout :: topo}"></nav>
+<div class="container">
+  <div th:replace="~{fragmentos/layout :: recados}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Notificacoes enviadas</h1>
+    <span class="text-secondary">RF14 &middot; RF15 &middot; RN11</span>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <div class="card-title">Lembretes automaticos</div>
+    <p class="mb-2">Todos os dias as 08:00 o sistema separa os atendimentos que vao acontecer nas
+      proximas <b th:text="${antecedencia}">24</b> horas e envia um lembrete ao cliente, uma vez
+      por atendimento (RN11).</p>
+    <form method="post" th:action="@{/notificacoes/lembretes}">
+      <button class="btn btn-outline-primary" type="submit">Rodar a rotina agora</button>
+    </form>
+  </div>
+
+  <div class="card p-3">
+    <div class="card-title">Historico de envios</div>
+    <div th:if="${#lists.isEmpty(notificacoes)}" class="vazio">
+      <p>Nenhuma notificacao registrada ainda.</p>
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(notificacoes)}">
+      <table class="table align-middle">
+        <thead><tr><th>Enviada em</th><th>Tipo</th><th>Destinatario</th>
+          <th>Assunto</th><th class="text-end">Atendimento</th></tr></thead>
+        <tbody>
+        <tr th:each="n : ${notificacoes}">
+          <td th:text="${n.quandoFormatado}">data</td>
+          <td><span class="badge" th:classappend="'tipo-' + ${n.tipo.name()}"
+                    th:text="${n.tipo.rotulo}">Tipo</span></td>
+          <td th:text="${n.destinatario}">email</td>
+          <td th:text="${n.assunto}">assunto</td>
+          <td class="text-end">
+            <a th:if="${n.agendamento != null}" class="btn btn-sm btn-outline-primary"
+               th:href="@{/agendamentos/{id}(id=${n.agendamento.id})}">Abrir</a>
+            <span th:if="${n.agendamento == null}" class="text-secondary">&mdash;</span>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer th:replace="~{fragmentos/layout :: rodape}"></footer>
+</div>
+</body>
+</html>

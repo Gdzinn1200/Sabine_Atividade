@@ -22,11 +22,6 @@ public final class RegrasSituacao {
     private RegrasSituacao() {
     }
 
-    /** Quem pediu a operacao. Enquanto nao ha autenticacao, a tela informa o perfil. */
-    public enum Perfil {
-        ADMINISTRADOR, PROFISSIONAL, CLIENTE
-    }
-
     /** RN09: situacoes que podem ser alcancadas a partir da situacao atual. */
     public static Set<SituacaoAgendamento> proximas(SituacaoAgendamento atual) {
         return switch (atual) {

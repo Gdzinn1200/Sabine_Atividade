@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Painel')}"></head>
+<body>
+<nav th:replace="~{fragmentos/layout :: topo}"></nav>
+<div class="container">
+  <div th:replace="~{fragmentos/layout :: recados}"></div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Painel de <span th:text="${hojeFormatado}">hoje</span></h1>
+    <a class="btn btn-primary" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Atendimentos hoje</div>
+      <div class="display-6" th:text="${#lists.size(agendamentosHoje)}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Aguardando confirmacao</div>
+      <div class="display-6" th:text="${aguardando}">0</div></div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Previsto no dia</div>
+      <div class="display-6">R$ <span th:text="${#numbers.formatDecimal(previsto,1,2,'COMMA')}">0,00</span></div>
+      </div></div>
+    <div class="col-md-3"><div class="card p-3">
+      <div class="card-title">Cancelados hoje</div>
+      <div class="display-6" th:text="${cancelados}">0</div></div></div>
+  </div>
+
+  <div class="card p-3 mb-3">
+    <div class="card-title">Atendimentos de hoje</div>
+    <div th:if="${#lists.isEmpty(agendamentosHoje)}" class="vazio">
+      <p>Nenhum atendimento marcado para hoje.</p>
+      <a class="btn btn-primary" th:href="@{/agendamentos/novo}">Novo agendamento</a>
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(agendamentosHoje)}">
+      <table class="table align-middle">
+        <thead><tr><th>Horario</th><th>Cliente</th><th>Servico</th><th>Profissional</th>
+          <th>Situacao</th><th class="text-end">Acoes</th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${agendamentosHoje}">
+          <td th:text="${a.horaInicioFormatada} + ' - ' + ${a.horaFimFormatada}">09:00</td>
+          <td th:text="${a.cliente.nome}">Cliente</td>
+          <td th:text="${a.servico.nome}">Servico</td>
+          <td th:text="${a.profissional.nome}">Profissional</td>
+          <td><span class="badge" th:classappend="'sit-' + ${a.situacao.name()}"
+                    th:text="${a.situacao.rotulo}">Agendado</span></td>
+          <td class="text-end">
+            <a class="btn btn-outline-primary btn-sm" th:href="@{/agendamentos/{id}(id=${a.id})}">Abrir</a>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <div class="col-md-6"><div class="card p-3 h-100">
+      <div class="card-title">Cadastros ativos</div>
+      <ul class="list-unstyled mb-0">
+        <li>Clientes: <b th:text="${totalClientes}">0</b></li>
+        <li>Servicos: <b th:text="${totalServicos}">0</b></li>
+        <li>Profissionais: <b th:text="${totalProfissionais}">0</b></li>
+      </ul>
+    </div></div>
+    <div class="col-md-6"><div class="card p-3 h-100">
+      <div class="card-title">Clientes bloqueados (RN08)</div>
+      <p class="text-secondary mb-0" th:if="${#lists.isEmpty(bloqueados)}">
+        Nenhum cliente bloqueado por faltas.</p>
+      <ul class="mb-0" th:unless="${#lists.isEmpty(bloqueados)}">
+        <li th:each="c : ${bloqueados}">
+          <a th:href="@{/clientes/{id}/historico(id=${c.id})}" th:text="${c.nome}">Cliente</a>
+        </li>
+      </ul>
+    </div></div>
+  </div>
+
+  <footer th:replace="~{fragmentos/layout :: rodape}"></footer>
+</div>
+</body>
+</html>

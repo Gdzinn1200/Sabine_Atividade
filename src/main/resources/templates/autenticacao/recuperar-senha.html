@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Recuperar senha')}"></head>
+<body class="tela-acesso">
+<div class="container">
+  <div class="caixa-acesso">
+    <div class="marca">Agenda<span>Pro</span></div>
+    <h1 class="h5 mt-3">Recuperar senha</h1>
+    <p class="text-secondary">Informe o e-mail da conta. Geramos um link de redefinicao
+      com validade de 60 minutos (RF18).</p>
+
+    <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+    <div th:if="${enviado}" class="alert alert-success">
+      Se existir uma conta com esse e-mail, o link de redefinicao foi enviado.
+      Ele vale <b th:text="${validade}">2</b> hora(s).
+    </div>
+    <div th:if="${link}" class="alert alert-info">
+      <p class="mb-1"><b>Ambiente de demonstracao:</b> nao ha servidor de e-mail configurado,
+        entao o envio fica registrado na tela de Notificacoes. Use o link abaixo para concluir
+        o teste.</p>
+      <a th:href="@{${link}}" th:text="${link}">link</a>
+    </div>
+
+    <form method="post" th:action="@{/recuperar-senha}" th:unless="${enviado}">
+      <div class="mb-3">
+        <label class="form-label" for="email">E-mail</label>
+        <input class="form-control" id="email" name="email" type="email" required autofocus>
+      </div>
+      <button class="btn btn-primary w-100" type="submit">Gerar link de redefinicao</button>
+    </form>
+    <div class="mt-3 text-center"><a th:href="@{/login}">Voltar para o login</a></div>
+  </div>
+  <footer class="text-center mt-4">
+    AgendaPro &middot; Equipe 1 &middot; Fabrica de Software
+  </footer>
+</div>
+</body>
+</html>

@@ -4,7 +4,7 @@
 
 Projeto desenvolvido pela **Equipe 1** nas disciplinas de **Imersão Profissional — Projeto de Software** (1º bimestre) e **Fábrica de Software** (2º bimestre), na Universidade Cesumar.
 
-> **Estado atual:** sistema parcialmente funcional. O fluxo completo do agendamento já funciona de ponta a ponta — cadastrar profissional e serviço, definir horários, consultar os horários livres, agendar, acompanhar a situação do atendimento e consultar o histórico — com as regras de negócio aplicadas e dados gravados em MySQL.
+> **Estado atual: sistema completo.** Os 18 requisitos funcionais previstos estão implementados — do cadastro ao relatório, passando por autenticação com perfis, agendamento com todas as regras aplicadas, notificações e recuperação de senha. Os dados ficam em MySQL e as regras de negócio são cobertas por **65 casos de teste automatizados**.
 
 ---
 
@@ -21,7 +21,7 @@ Projeto desenvolvido pela **Equipe 1** nas disciplinas de **Imersão Profissiona
 9. [Documentação das entregas](#9-documentação-das-entregas)
 10. [Rastreabilidade](#10-rastreabilidade)
 11. [Como a equipe trabalha](#11-como-a-equipe-trabalha)
-12. [Pendências e próximos passos](#12-pendências-e-próximos-passos)
+12. [O que ficou pronto e o que viria depois](#12-o-que-ficou-pronto-e-o-que-viria-depois)
 13. [Licença](#13-licença)
 
 ---
@@ -82,6 +82,12 @@ Um sistema web que centraliza clientes, profissionais, serviços, horários e hi
 | Agenda do dia com filtros por profissional e situação | RF12 | — |
 | Histórico de atendimentos do cliente | RF13 | — |
 | Bloqueio automático do cliente por faltas | — | RN10 |
+| Login com senha guardada como hash e sal | RF02 | RNF01 |
+| Acesso por perfil: menu e telas conforme quem entrou | RF17 | RNF02 |
+| Confirmação registrada ao agendar, remarcar e cancelar | RF14 | — |
+| Lembrete automático 24 horas antes do atendimento | RF15 | RN11 |
+| Relatório por período, profissional e serviço, com exportação em CSV | RF16 | RN13 |
+| Recuperação de senha por link temporário | RF18 | — |
 
 ### O fluxo completo que já funciona
 
@@ -103,12 +109,25 @@ Um sistema web que centraliza clientes, profissionais, serviços, horários e hi
 8. Histórico          atendimentos do cliente e todas as mudanças registradas
 ```
 
-### Em desenvolvimento (até 27/11)
+### O que cada perfil enxerga
 
-- Autenticação, perfis e permissões (RF02, RF17, RNF02)
-- Confirmação e lembrete por e-mail (RF14, RF15, RN11)
-- Relatórios de atendimentos (RF16, RN13)
-- Recuperação de senha (RF18)
+O acesso não é só uma tela escondida: o **mesmo** quadro de permissões monta o menu e filtra
+cada requisição, na classe [`RegrasAcesso`](src/main/java/br/edu/cesumar/agendapro/dominio/regras/RegrasAcesso.java).
+Digitar a URL de uma tela que não é do seu perfil leva para o aviso de acesso negado, e dois
+casos de teste (CT40 e CT41) existem só para garantir que menu e filtro nunca se separem.
+
+| Área | Administrador | Profissional | Cliente |
+| --- | --- | --- | --- |
+| Painel | Sim | Sim | Sim (o próprio) |
+| Novo agendamento | Sim | Sim | Sim (para si) |
+| Agenda do dia | Sim | Sim (a própria) | Não |
+| Meus atendimentos | — | — | Sim |
+| Clientes | Sim | Sim | Não |
+| Profissionais, serviços | Sim | Não | Não |
+| Horários e bloqueios | Sim | Sim | Não |
+| Relatórios (RN13) | Sim | Não | Não |
+| Notificações | Sim | Não | Não |
+| Usuários | Sim | Não | Não |
 
 ### Fora do escopo do projeto
 
@@ -132,10 +151,23 @@ As regras ficam isoladas em classes de **Java puro**, na pasta [`src/main/java/b
 | **RN08** | No máximo 3 agendamentos futuros ativos por cliente | `RegrasAgenda.agendamentosFuturosAtivos` |
 | **RN09** | Agendado → Confirmado → Em atendimento → Concluído; situações finais não voltam atrás | `RegrasSituacao.proximas` |
 | **RN10** | Cliente com 3 faltas em 90 dias fica bloqueado até o administrador liberar | `RegrasAgenda.faltasRecentes` |
+| **RN11** | Um lembrete por atendimento, 24 horas antes, só para atendimento ativo | `RegrasNotificacao.deveEnviarLembrete` |
 | **RN12** | Cadastros são inativados, nunca excluídos, para preservar o histórico | métodos `inativar` dos serviços |
+| **RN13** | Relatório é do administrador, e o período não passa de 365 dias | `RegrasAcesso` e `RegrasRelatorio.validarPeriodo` |
 | **RN14** | Não existem dois serviços ativos com o mesmo nome | `RegrasServico` |
 
-As treze regras completas estão no [documento de visão e requisitos](docs/1bim-01-visao-e-requisitos.pdf).
+As quatorze regras completas estão no [documento de visão e requisitos](docs/1bim-01-visao-e-requisitos.pdf).
+
+### Como a senha é guardada (RNF01)
+
+A senha **nunca** é gravada em texto. O que vai para o banco é o resultado de
+**PBKDF2-HMAC-SHA256 com 120.000 iterações e um sal de 16 bytes sorteado por conta**, no formato
+`pbkdf2$<iterações>$<sal>$<hash>`. Duas contas com a mesma senha geram registros diferentes, e a
+conferência usa comparação de tempo constante.
+
+O requisito cita o bcrypt como exemplo; a equipe optou pelo PBKDF2 porque ele já vem no próprio
+JDK (`javax.crypto`), o que evita mais uma dependência externa e mantém a regra dentro de
+`dominio/regras`, onde pode ser testada sozinha — como fazem os casos CT42 a CT47.
 
 ---
 
@@ -185,6 +217,20 @@ mvn spring-boot:run
 # http://localhost:8080
 ```
 
+### Contas de demonstração
+
+Os dados de demonstração criam quatro contas, todas com a senha **`123456`**:
+
+| E-mail | Perfil | Serve para mostrar |
+| --- | --- | --- |
+| `admin@agendapro.com` | Administrador | O sistema inteiro: cadastros, relatórios, notificações e usuários |
+| `ana@agendapro.com` | Profissional | A agenda limitada à própria profissional |
+| `jonas@agendapro.com` | Profissional | Outro profissional, com outros serviços |
+| `marina@email.com` | Cliente | O que o cliente vê: marcar e acompanhar só os próprios atendimentos |
+
+As senhas no script são hashes PBKDF2 reais, gerados pela própria classe `Senha`: não há senha em
+texto nem no repositório nem no banco.
+
 O arquivo `application-local.properties` **não é versionado** — ele guarda a senha do banco de cada integrante. O repositório traz apenas o arquivo de exemplo, com os nomes das chaves e sem nenhum valor real.
 
 Os dados de demonstração usam datas relativas a `CURDATE()`, então a agenda do dia aparece preenchida em qualquer data em que o script for executado. Rodar o script novamente recarrega a base do zero.
@@ -209,10 +255,15 @@ javac -d build $(find src/main/java/br/edu/cesumar/agendapro/dominio/regras -nam
 java -cp build TesteRegras
 ```
 
-**Última execução registrada: 33 casos, 33 aprovados, 0 reprovados.**
-Evidência em [`docs/evidencias/execucao_testes_regras_06-11-2026.txt`](docs/evidencias/execucao_testes_regras_06-11-2026.txt).
+**Última execução registrada: 65 casos, 65 aprovados, 0 reprovados.**
+Evidência em [`docs/evidencias/execucao_testes_regras_27-11-2026.txt`](docs/evidencias/execucao_testes_regras_27-11-2026.txt).
 
-Os casos de teste completos, incluindo os manuais, estão em [`docs/casos_de_teste_06-11-2026.md`](docs/casos_de_teste_06-11-2026.md).
+Os casos de teste completos, incluindo os manuais, estão em [`docs/casos_de_teste_27-11-2026.md`](docs/casos_de_teste_27-11-2026.md).
+
+Os testes encontraram dois defeitos reais antes desta entrega — um limite de período que a tela
+prometia mas a regra não aplicava, e uma taxa de comparecimento sem definição escrita. Os dois
+estão registrados, corrigidos e protegidos por caso de teste, na seção 3 do documento de casos de
+teste.
 
 ---
 
@@ -267,14 +318,15 @@ Os casos de teste completos, incluindo os manuais, estão em [`docs/casos_de_tes
 | --- | --- | --- | --- |
 | 1 | 20/10/2026 | [Planejamento técnico e implementação inicial](docs/2bim-01-planejamento-e-implementacao-inicial.pdf) | Código executável e primeiras evidências de testes |
 | 2 | 06/11/2026 | [Implementação, integração e testes](docs/2bim-02-implementacao-integracao-e-testes.pdf) | Sistema parcialmente funcional |
-| 3 | 27/11/2026 | *(em andamento)* | Conclusão e apresentação final |
+| 3 | 27/11/2026 | [Conclusão e apresentação final](docs/2bim-03-conclusao-e-apresentacao-final.pdf) | Software completo e funcionando |
 
 ### Outros materiais
 
 | Arquivo | Conteúdo |
 | --- | --- |
 | [`docs/backlog_2bim.csv`](docs/backlog_2bim.csv) | Backlog completo com requisito, responsável, prazo, prioridade, situação e critério de conclusão |
-| [`docs/casos_de_teste_06-11-2026.md`](docs/casos_de_teste_06-11-2026.md) | Casos de teste automatizados e manuais da entrega atual |
+| [`docs/casos_de_teste_27-11-2026.md`](docs/casos_de_teste_27-11-2026.md) | Casos de teste automatizados e manuais da entrega final |
+| [`docs/casos_de_teste_06-11-2026.md`](docs/casos_de_teste_06-11-2026.md) | Casos de teste da entrega de 06/11 |
 | [`docs/casos_de_teste_20-10-2026.md`](docs/casos_de_teste_20-10-2026.md) | Casos de teste da entrega anterior |
 | [`docs/evidencias/`](docs/evidencias) | Registros de execução dos testes |
 
@@ -297,11 +349,19 @@ Cada requisito está ligado ao lugar onde foi implementado e aos testes que o co
 | RF10 — Cancelar agendamento | `RegrasSituacao`, `AgendamentoService.cancelar` | CT30 a CT33, CTM22, CTM23 | Implementado |
 | RF11 — Situação do atendimento | `RegrasSituacao`, `AgendamentoService` | CT27 a CT29, CTM19 | Implementado |
 | RF12 — Consultar agenda | `AgendamentoController.agenda` | CTM18 | Implementado |
-| RF13 — Histórico do cliente | `AgendamentoService.historicoDoCliente` | CTM25 | Implementado |
+| RF13 — Histórico do cliente | `AgendamentoService.historicoDoCliente` | CTM25, CTM13 | Implementado |
+| RF02 — Autenticar usuário | `AutenticacaoController`, `UsuarioService`, `Senha` | CT42 a CT47, CTM09, CTM10 | Implementado |
+| RF14 — Notificar o cliente | `NotificacaoService`, `RegrasNotificacao` | CT55, CT56, CTM14 | Implementado |
+| RF15 — Lembrete do atendimento | `NotificacaoService.enviarLembretes` | CT49 a CT54, CTM15 | Implementado |
+| RF16 — Relatórios de atendimentos | `RelatorioController`, `RegrasRelatorio` | CT57 a CT62, CTM16, CTM17 | Implementado |
+| RF17 — Manter usuários e perfis | `UsuarioController`, `UsuarioService` | CT34 a CT41, CTM21 | Implementado |
+| RF18 — Recuperar senha | `AutenticacaoController`, `RecuperacaoSenha` | CT48, CTM19, CTM20 | Implementado |
+| RNF01 — Senha com hash e sal | `dominio/regras/Senha` | CT42 a CT47 | Implementado |
+| RNF02 — Acesso por perfil | `RegrasAcesso`, `SessaoFiltro`, `ContextoGlobal` | CT34 a CT41, CTM11 a CTM13 | Implementado |
 | RNF05 — Mensagens de validação | `web/Mensagens` e os formulários | CT02, CT33, CTM02 | Implementado |
+| RNF06 — Interface responsiva | Grade do Bootstrap e `agendapro.css` | CTM22 | Implementado |
 | RNF10 — Log das operações | `HistoricoSituacao` | CTM24 | Implementado |
 | RNF12 — Banco relacional | `script_criacao.sql`, repositórios JPA | CTM27 | Implementado |
-| RF02, RF14 a RF18, RNF01, RNF02 | — | — | Previsto para 27/11 |
 
 ---
 
@@ -332,15 +392,24 @@ Cada entrega é marcada com uma tag, para identificar a versão avaliada mesmo c
 | --- | --- |
 | `entrega-20-10-2026` | Planejamento técnico e implementação inicial |
 | `entrega-06-11-2026` | Implementação, integração e testes |
+| `entrega-27-11-2026` | Conclusão e apresentação final |
 
 ---
 
-## 12. Pendências e próximos passos
+## 12. O que ficou pronto e o que viria depois
 
-- Executar e anexar as evidências dos casos de teste manuais CTM01 a CTM27 (tarefa T30)
-- **Até 27/11:** autenticação e perfis (T43), notificações por e-mail (T44), relatórios (T45), recuperação de senha (T46), revisão de responsividade (T47) e consolidação da documentação e da apresentação final (T48)
+**Pronto:** as 34 tarefas do backlog estão concluídas e os 18 requisitos funcionais do documento
+de visão estão implementados e rastreados até o teste que os cobre. O backlog completo está em
+[`docs/backlog_2bim.csv`](docs/backlog_2bim.csv).
 
-O backlog completo está em [`docs/backlog_2bim.csv`](docs/backlog_2bim.csv).
+**O que um próximo ciclo trataria,** se o projeto continuasse depois da disciplina:
+
+| Item | Por que ficou para depois |
+| --- | --- |
+| Envio real de e-mail (SMTP) | A regra de **quando** notificar está pronta e testada (RN11); o envio fica registrado na tela de Notificações. Ligar um servidor real mexe em um único método, `NotificacaoService.entregar`, mas exige uma conta de e-mail institucional que o projeto não tem. |
+| Confirmação pelo próprio cliente por link | Hoje a confirmação é feita pelo estabelecimento. O fluxo por link reaproveitaria o mesmo mecanismo de token já usado na recuperação de senha (RF18). |
+| Relatório em gráfico | Os números já saem agrupados por profissional e por serviço, e exportam em CSV. Um gráfico seria apresentação dos mesmos dados. |
+| Aplicativo para celular | Fora do escopo declarado no documento de visão. As telas são responsivas e funcionam no navegador do celular (RNF06). |
 
 ---
 

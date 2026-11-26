@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-br" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragmentos/layout :: cabeca('Sem permissao')}"></head>
+<body>
+<nav th:replace="~{fragmentos/layout :: topo}"></nav>
+<div class="container">
+  <div class="card p-4 text-center">
+    <h1 class="h4">Esta area nao faz parte do seu perfil</h1>
+    <p class="text-secondary mb-1">
+      O acesso e definido por perfil (RNF02). O seu perfil atual e
+      <b th:if="${usuario != null}" th:text="${usuario.perfil.rotulo}">Perfil</b>.
+    </p>
+    <p class="text-secondary">Se precisar deste acesso, fale com o administrador do sistema.</p>
+    <div>
+      <a class="btn btn-primary" th:href="@{/}">Voltar ao painel</a>
+    </div>
+  </div>
+  <footer th:replace="~{fragmentos/layout :: rodape}"></footer>
+</div>
+</body>
+</html>
