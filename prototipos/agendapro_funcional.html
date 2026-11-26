@@ -245,7 +245,7 @@ function maisDias(iso,n){var d=new Date(iso+'T12:00');d.setDate(d.getDate()+n);
 function proximoDiaUtil(){
   var d=maisDias(hojeISO(),1);
   for(var i=0;i<7;i++){
-    if(db.horarios.some(function(h){return h.diaSemana===diaSemana(d)})) return d;
+    if(db.horarios.some(function(h){return h.dia===diaSemana(d)})) return d;
     d=maisDias(d,1);
   }
   return maisDias(hojeISO(),1);
