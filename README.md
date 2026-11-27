@@ -4,6 +4,22 @@
 
 Projeto desenvolvido pela **Equipe 1** nas disciplinas de **Imersão Profissional — Projeto de Software** (1º bimestre) e **Fábrica de Software** (2º bimestre), na Universidade Cesumar.
 
+## 🔗 Links rápidos para a apresentação
+
+| O que | Onde |
+| --- | --- |
+| **Ver o sistema funcionando** (protótipo, abre no navegador) | **https://gdzinn1200.github.io/Sabine_Atividade/prototipos/agendapro_funcional.html** |
+| Slides da apresentação final | [`docs/apresentacao/slides-apresentacao-final.pdf`](docs/apresentacao/slides-apresentacao-final.pdf) |
+| Slides do banco de dados | [`docs/apresentacao/slides-banco-de-dados.pdf`](docs/apresentacao/slides-banco-de-dados.pdf) |
+| Documento da entrega final | [`docs/2bim-03-conclusao-e-apresentacao-final.pdf`](docs/2bim-03-conclusao-e-apresentacao-final.pdf) |
+| Resultado dos 65 testes | [`docs/evidencias/execucao_testes_regras_27-11-2026.txt`](docs/evidencias/execucao_testes_regras_27-11-2026.txt) |
+| Script do banco | [`banco-de-dados/script_criacao.sql`](banco-de-dados/script_criacao.sql) |
+| Modelos do banco | [conceitual](banco-de-dados/conceitual.png) · [lógico 1](banco-de-dados/logico1.png) · [lógico 2](banco-de-dados/logico2.png) |
+
+Contas de demonstração do protótipo, todas com a senha `123456`: `admin@agendapro.com` (administrador), `ana@agendapro.com` (profissional) e `marina@email.com` (cliente).
+
+---
+
 > **Estado atual: sistema completo.** Os 18 requisitos funcionais previstos estão implementados — do cadastro ao relatório, passando por autenticação com perfis, agendamento com todas as regras aplicadas, notificações e recuperação de senha. Os dados ficam em MySQL e as regras de negócio são cobertas por **65 casos de teste automatizados**.
 
 ---
