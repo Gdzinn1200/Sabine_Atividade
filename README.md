@@ -325,6 +325,8 @@ teste.
 | Arquivo | Conteúdo |
 | --- | --- |
 | [`docs/backlog_2bim.csv`](docs/backlog_2bim.csv) | Backlog completo com requisito, responsável, prazo, prioridade, situação e critério de conclusão |
+| [`docs/apresentacao/slides-apresentacao-final.pdf`](docs/apresentacao/slides-apresentacao-final.pdf) | Slides da apresentação final (22 slides) |
+| [`docs/apresentacao/slides-banco-de-dados.pdf`](docs/apresentacao/slides-banco-de-dados.pdf) | Slides da parte de banco de dados (9 slides) |
 | [`docs/casos_de_teste_27-11-2026.md`](docs/casos_de_teste_27-11-2026.md) | Casos de teste automatizados e manuais da entrega final |
 | [`docs/casos_de_teste_06-11-2026.md`](docs/casos_de_teste_06-11-2026.md) | Casos de teste da entrega de 06/11 |
 | [`docs/casos_de_teste_20-10-2026.md`](docs/casos_de_teste_20-10-2026.md) | Casos de teste da entrega anterior |
