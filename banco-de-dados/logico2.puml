@@ -11,7 +11,7 @@ skinparam class {
 }
 hide circle
 hide methods
-title Parte 2 - Agendamentos
+title Parte 2 - Agendamentos, histórico e avisos
 
 entity "cliente" as cliente #F2F2F2 {
   <b>id_cliente</b> : INT <<PK>>
@@ -51,22 +51,35 @@ entity "historico_situacao" as historico {
 entity "notificacao" as notificacao {
   <b>id_notificacao</b> : INT <<PK>>
   --
-  * id_agendamento : INT <<FK>>
+  id_agendamento : INT <<FK>>
   * tipo : ENUM
   * destinatario : VARCHAR(120)
+  assunto : VARCHAR(160)
   data_hora_envio : DATETIME
   * enviada : BOOLEAN
+}
+
+entity "recuperacao_senha" as recuperacao {
+  <b>id_recuperacao</b> : INT <<PK>>
+  --
+  * id_usuario : INT <<FK>>
+  * token : VARCHAR(64) <<UK>>
+  * criado_em : DATETIME
+  * expira_em : DATETIME
+  * usado : BOOLEAN
 }
 
 cliente ||--o{ agendamento
 profissional ||--o{ agendamento
 servico ||--o{ agendamento
 agendamento ||--o{ historico
-agendamento ||--o{ notificacao
 usuario ||--o{ historico
+usuario ||--o{ recuperacao
+agendamento ||--o{ notificacao
 
 legend bottom
   Tabelas em cinza estão detalhadas na Parte 1; aqui aparecem apenas com a chave primária.
+  O aviso de recuperação de senha não pertence a um atendimento, por isso id_agendamento aceita nulo.
   * campo obrigatório  |  PK chave primária  |  FK chave estrangeira
 endlegend
 @enduml

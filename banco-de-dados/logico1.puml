@@ -22,6 +22,7 @@ entity "usuario" as usuario {
   * perfil : ENUM
   * ativo : BOOLEAN
   * data_cadastro : DATETIME
+  ultimo_acesso : DATETIME
 }
 entity "cliente" as cliente {
   <b>id_cliente</b> : INT <<PK>>
