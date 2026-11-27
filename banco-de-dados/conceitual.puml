@@ -66,10 +66,19 @@ entity "HISTÓRICO DE SITUAÇÃO" as historico {
   motivo
 }
 entity "NOTIFICAÇÃO" as notificacao {
-  tipo: confirmação ou lembrete
+  tipo: confirmação, lembrete,
+  remarcação, cancelamento
+  ou recuperação de senha
   destinatário
+  assunto
   data e hora do envio
   situação do envio
+}
+entity "RECUPERAÇÃO DE SENHA" as recuperacao {
+  token
+  criado em
+  expira em
+  usado
 }
 
 usuario "1" -- "0..1" cliente : possui acesso >
@@ -83,4 +92,5 @@ servico "1" -- "0..*" agendamento : compõe >
 agendamento "1" -- "0..*" historico : registra >
 agendamento "1" -- "0..*" notificacao : gera >
 usuario "1" -- "0..*" historico : responsável por >
+usuario "1" -- "0..*" recuperacao : solicita >
 @enduml
